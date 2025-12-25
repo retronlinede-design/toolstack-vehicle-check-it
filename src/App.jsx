@@ -1,4 +1,4 @@
-// Vehicle Check-It (ToolStack) — module-ready MVP
+// Vehicle Check-It (ToolStack) — module-ready MVP (Styled v1: grey + lime/green accent)
 // Paste into: src/App.jsx
 // Requires: Tailwind v4 configured (same as other ToolStack apps).
 
@@ -41,57 +41,60 @@ function loadProfile() {
 }
 
 function defaultTemplate() {
+  const sid = () => crypto?.randomUUID?.() || `s-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const iid = () => crypto?.randomUUID?.() || `i-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
   return {
     name: "Default Vehicle Check",
     sections: [
       {
-        id: crypto?.randomUUID?.() || "s1",
+        id: sid(),
         title: "Exterior",
         items: [
-          { id: crypto?.randomUUID?.() || "i1", label: "Tyres (pressure / condition)", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i2", label: "Lights (all working)", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i3", label: "Windows / mirrors clean", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i4", label: "Body damage check", severity: "ok" },
+          { id: iid(), label: "Tyres (pressure / condition)", severity: "ok" },
+          { id: iid(), label: "Lights (all working)", severity: "ok" },
+          { id: iid(), label: "Windows / mirrors clean", severity: "ok" },
+          { id: iid(), label: "Body damage check", severity: "ok" },
         ],
       },
       {
-        id: crypto?.randomUUID?.() || "s2",
+        id: sid(),
         title: "Interior",
         items: [
-          { id: crypto?.randomUUID?.() || "i5", label: "Cabin clean", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i6", label: "Documents present (registration/insurance)", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i7", label: "Fuel card / toll card", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i8", label: "Charging cables / accessories", severity: "ok" },
+          { id: iid(), label: "Cabin clean", severity: "ok" },
+          { id: iid(), label: "Documents present (registration/insurance)", severity: "ok" },
+          { id: iid(), label: "Fuel card / toll card", severity: "ok" },
+          { id: iid(), label: "Charging cables / accessories", severity: "ok" },
         ],
       },
       {
-        id: crypto?.randomUUID?.() || "s3",
+        id: sid(),
         title: "Safety",
         items: [
-          { id: crypto?.randomUUID?.() || "i9", label: "Warning triangle", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i10", label: "High-visibility vest", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i11", label: "First aid kit", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i12", label: "Spare bulb kit / tools (if applicable)", severity: "ok" },
+          { id: iid(), label: "Warning triangle", severity: "ok" },
+          { id: iid(), label: "High-visibility vest", severity: "ok" },
+          { id: iid(), label: "First aid kit", severity: "ok" },
+          { id: iid(), label: "Spare bulb kit / tools (if applicable)", severity: "ok" },
         ],
       },
       {
-        id: crypto?.randomUUID?.() || "s4",
+        id: sid(),
         title: "Vehicle status",
         items: [
-          { id: crypto?.randomUUID?.() || "i13", label: "Fuel level sufficient", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i14", label: "No warning lights", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i15", label: "Wipers / washer fluid", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i16", label: "AdBlue level (if applicable)", severity: "ok" },
+          { id: iid(), label: "Fuel level sufficient", severity: "ok" },
+          { id: iid(), label: "No warning lights", severity: "ok" },
+          { id: iid(), label: "Wipers / washer fluid", severity: "ok" },
+          { id: iid(), label: "AdBlue level (if applicable)", severity: "ok" },
         ],
       },
       {
-        id: crypto?.randomUUID?.() || "s5",
+        id: sid(),
         title: "Post-trip",
         items: [
-          { id: crypto?.randomUUID?.() || "i17", label: "Receipts stored", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i18", label: "Odometer noted", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i19", label: "Personal items removed", severity: "ok" },
-          { id: crypto?.randomUUID?.() || "i20", label: "Vehicle locked / keys returned", severity: "ok" },
+          { id: iid(), label: "Receipts stored", severity: "ok" },
+          { id: iid(), label: "Odometer noted", severity: "ok" },
+          { id: iid(), label: "Personal items removed", severity: "ok" },
+          { id: iid(), label: "Vehicle locked / keys returned", severity: "ok" },
         ],
       },
     ],
@@ -109,10 +112,7 @@ function loadState() {
 }
 
 function saveState(state) {
-  const next = {
-    ...state,
-    meta: { ...state.meta, updatedAt: new Date().toISOString() },
-  };
+  const next = { ...state, meta: { ...state.meta, updatedAt: new Date().toISOString() } };
   localStorage.setItem(KEY, JSON.stringify(next));
   return next;
 }
@@ -128,6 +128,14 @@ function labelFor(sev) {
   if (sev === "note") return "Note";
   return "OK";
 }
+
+// Shared styling tokens (match Inspect-It / Debt-It styled v1)
+const btnSecondary =
+  "px-3 py-2 rounded-xl bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50 active:translate-y-[1px] transition";
+const btnPrimary =
+  "px-3 py-2 rounded-xl bg-neutral-900 text-white border border-neutral-900 shadow-sm hover:bg-neutral-800 active:translate-y-[1px] transition";
+const inputBase =
+  "w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 bg-white focus:outline-none focus:ring-2 focus:ring-lime-400/25 focus:border-neutral-300";
 
 export default function App() {
   const [profile, setProfile] = useState(loadProfile());
@@ -152,7 +160,19 @@ export default function App() {
   }, [state]);
 
   const vehicles = useMemo(() => profile.vehicles || [], [profile.vehicles]);
-  const vehicleLabel = useMemo(() => vehicles.find((v) => v.id === vehicleId)?.label || "-", [vehicles, vehicleId]);
+
+  // Keep vehicleId valid if profile vehicles change
+  useEffect(() => {
+    if (!vehicles.length) return;
+    const exists = vehicles.some((v) => v.id === vehicleId);
+    if (!exists) setVehicleId(vehicles[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehicles]);
+
+  const vehicleLabel = useMemo(
+    () => vehicles.find((v) => v.id === vehicleId)?.label || "-",
+    [vehicles, vehicleId]
+  );
 
   // Draft check (mutable per item)
   const [draft, setDraft] = useState(() => {
@@ -246,17 +266,13 @@ export default function App() {
       odometer: String(odometer || "").trim(),
       generalNotes: String(generalNotes || "").trim(),
       sections: draft.sections,
-      summary: {
-        totalItems,
-        doneCount,
-        issueCount,
-      },
+      summary: { totalItems, doneCount, issueCount },
     };
 
     setState((prev) =>
       saveState({
         ...prev,
-        checks: [check, ...prev.checks],
+        checks: [check, ...(prev.checks || [])],
       })
     );
 
@@ -264,15 +280,11 @@ export default function App() {
   }
 
   function deleteCheck(id) {
-    setState((prev) => saveState({ ...prev, checks: prev.checks.filter((c) => c.id !== id) }));
+    setState((prev) => saveState({ ...prev, checks: (prev.checks || []).filter((c) => c.id !== id) }));
   }
 
   function exportJSON() {
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      profile,
-      data: state,
-    };
+    const payload = { exportedAt: new Date().toISOString(), profile, data: state };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -318,37 +330,27 @@ export default function App() {
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
       <div className="max-w-6xl mx-auto p-4 sm:p-6">
+        {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-2xl font-bold">Vehicle Check-It</div>
+            <div className="text-2xl font-bold tracking-tight">Vehicle Check-It</div>
             <div className="text-sm text-neutral-600">
               Module-ready ({moduleManifest.id}.{moduleManifest.version}) • Offline-first • Export/Import + Print
             </div>
+            <div className="mt-3 h-[2px] w-80 rounded-full bg-gradient-to-r from-lime-400/0 via-lime-400 to-emerald-400/0" />
           </div>
 
           <div className="flex flex-wrap gap-2 justify-end">
-            <button
-              className="px-3 py-2 rounded-xl bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50"
-              onClick={() => setPreviewOpen(true)}
-            >
+            <button className={btnSecondary} onClick={() => setPreviewOpen(true)}>
               Preview
             </button>
-            <button
-              className="px-3 py-2 rounded-xl bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50"
-              onClick={printPreview}
-            >
+            <button className={btnSecondary} onClick={printPreview}>
               Print / Save PDF
             </button>
-            <button
-              className="px-3 py-2 rounded-xl bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50"
-              onClick={exportJSON}
-            >
+            <button className={btnSecondary} onClick={exportJSON}>
               Export
             </button>
-            <button
-              className="px-3 py-2 rounded-xl bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50"
-              onClick={() => fileRef.current?.click()}
-            >
+            <button className={btnPrimary} onClick={() => fileRef.current?.click()}>
               Import
             </button>
             <input
@@ -365,6 +367,7 @@ export default function App() {
           </div>
         </div>
 
+        {/* Main grid */}
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Profile */}
           <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4">
@@ -373,7 +376,7 @@ export default function App() {
               <label className="block text-sm">
                 <div className="text-neutral-600">Organization</div>
                 <input
-                  className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200"
+                  className={inputBase}
                   value={profile.org}
                   onChange={(e) => setProfile({ ...profile, org: e.target.value })}
                 />
@@ -381,7 +384,7 @@ export default function App() {
               <label className="block text-sm">
                 <div className="text-neutral-600">User</div>
                 <input
-                  className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200"
+                  className={inputBase}
                   value={profile.user}
                   onChange={(e) => setProfile({ ...profile, user: e.target.value })}
                 />
@@ -389,7 +392,7 @@ export default function App() {
               <label className="block text-sm">
                 <div className="text-neutral-600">Language</div>
                 <select
-                  className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 bg-white"
+                  className={inputBase}
                   value={profile.language}
                   onChange={(e) => setProfile({ ...profile, language: e.target.value })}
                 >
@@ -419,7 +422,7 @@ export default function App() {
                   <div className="text-neutral-600">Date</div>
                   <input
                     type="date"
-                    className="mt-1 px-3 py-2 rounded-xl border border-neutral-200"
+                    className={inputBase}
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                   />
@@ -428,7 +431,7 @@ export default function App() {
                 <label className="text-sm">
                   <div className="text-neutral-600">Vehicle</div>
                   <select
-                    className="mt-1 px-3 py-2 rounded-xl border border-neutral-200 bg-white"
+                    className={inputBase}
                     value={vehicleId}
                     onChange={(e) => setVehicleId(e.target.value)}
                   >
@@ -443,7 +446,7 @@ export default function App() {
                 <label className="text-sm">
                   <div className="text-neutral-600">Odometer</div>
                   <input
-                    className="mt-1 px-3 py-2 rounded-xl border border-neutral-200"
+                    className={inputBase}
                     placeholder="e.g., 123456"
                     value={odometer}
                     onChange={(e) => setOdometer(e.target.value)}
@@ -455,13 +458,14 @@ export default function App() {
             <label className="block text-sm mt-3">
               <div className="text-neutral-600">General notes</div>
               <input
-                className="w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200"
+                className={inputBase}
                 placeholder="Anything important about the vehicle today"
                 value={generalNotes}
                 onChange={(e) => setGeneralNotes(e.target.value)}
               />
             </label>
 
+            {/* Sections */}
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
               {draft.sections.map((s) => (
                 <div key={s.id} className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
@@ -473,22 +477,21 @@ export default function App() {
                           <label className="flex items-center gap-2 text-sm">
                             <input
                               type="checkbox"
+                              className="h-4 w-4 rounded border-neutral-300 accent-lime-500"
                               checked={it.done}
                               onChange={(e) => updateItem(s.id, it.id, { done: e.target.checked })}
                             />
-                            <span className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</span>
+                            <span className={it.done ? "line-through text-neutral-500" : ""}>
+                              {it.label}
+                            </span>
                           </label>
 
                           <div className="flex items-center gap-2">
-                            <span
-                              className={
-                                "text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)
-                              }
-                            >
+                            <span className={"text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>
                               {labelFor(it.severity)}
                             </span>
                             <select
-                              className="text-sm px-2 py-1 rounded-xl border border-neutral-200 bg-white"
+                              className="text-sm px-2 py-1 rounded-xl border border-neutral-200 bg-white focus:outline-none focus:ring-2 focus:ring-lime-400/25"
                               value={it.severity}
                               onChange={(e) => updateItem(s.id, it.id, { severity: e.target.value })}
                             >
@@ -501,7 +504,7 @@ export default function App() {
 
                         {(it.severity === "note" || it.severity === "issue") && (
                           <input
-                            className="mt-2 w-full px-3 py-2 rounded-xl border border-neutral-200 text-sm"
+                            className="mt-2 w-full px-3 py-2 rounded-xl border border-neutral-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-lime-400/25"
                             placeholder={it.severity === "issue" ? "Describe the issue" : "Add a note"}
                             value={it.note}
                             onChange={(e) => updateItem(s.id, it.id, { note: e.target.value })}
@@ -515,17 +518,11 @@ export default function App() {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <button
-                className="px-3 py-2 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-50"
-                onClick={resetDraft}
-              >
+              <button className={btnSecondary} onClick={resetDraft}>
                 Reset
               </button>
 
-              <button
-                className="px-4 py-2 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800"
-                onClick={saveCheck}
-              >
+              <button className={btnPrimary} onClick={saveCheck}>
                 Save check
               </button>
             </div>
@@ -558,10 +555,14 @@ export default function App() {
                       <td className="py-2 pr-2">{c.vehicleLabel || c.vehicleId}</td>
                       <td className="py-2 pr-2">{c.odometer || "-"}</td>
                       <td className="py-2 pr-2">
-                        <span className={
-                          "text-xs px-2 py-1 rounded-full border " +
-                          (c.summary?.issueCount ? "bg-red-100 text-red-800 border-red-200" : "bg-emerald-100 text-emerald-800 border-emerald-200")
-                        }>
+                        <span
+                          className={
+                            "text-xs px-2 py-1 rounded-full border " +
+                            (c.summary?.issueCount
+                              ? "bg-red-100 text-red-800 border-red-200"
+                              : "bg-emerald-100 text-emerald-800 border-emerald-200")
+                          }
+                        >
                           {c.summary?.issueCount || 0}
                         </span>
                       </td>
@@ -569,10 +570,7 @@ export default function App() {
                         {c.summary?.doneCount || 0}/{c.summary?.totalItems || 0}
                       </td>
                       <td className="py-2 pr-2 text-right">
-                        <button
-                          className="px-3 py-1.5 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-50"
-                          onClick={() => deleteCheck(c.id)}
-                        >
+                        <button className="px-3 py-1.5 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-50" onClick={() => deleteCheck(c.id)}>
                           Delete
                         </button>
                       </td>
@@ -589,18 +587,12 @@ export default function App() {
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-3 z-50">
             <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
               <div className="p-3 border-b flex items-center justify-between">
-                <div className="font-semibold">Preview</div>
+                <div className="font-semibold">Preview — Vehicle Check Report</div>
                 <div className="flex gap-2">
-                  <button
-                    className="px-3 py-2 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-50"
-                    onClick={printPreview}
-                  >
+                  <button className={btnSecondary} onClick={printPreview}>
                     Print / Save PDF
                   </button>
-                  <button
-                    className="px-3 py-2 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800"
-                    onClick={() => setPreviewOpen(false)}
-                  >
+                  <button className={btnPrimary} onClick={() => setPreviewOpen(false)}>
                     Close
                   </button>
                 </div>
@@ -609,21 +601,39 @@ export default function App() {
               <div className="p-6 overflow-auto max-h-[80vh]">
                 <div className="text-xl font-bold">{profile.org || "ToolStack"}</div>
                 <div className="text-sm text-neutral-600">Vehicle Check Report</div>
+                <div className="mt-2 h-[2px] w-72 rounded-full bg-gradient-to-r from-lime-400/0 via-lime-400 to-emerald-400/0" />
 
-                <div className="mt-2 text-sm">
-                  <div><span className="text-neutral-600">User:</span> {profile.user || "-"}</div>
-                  <div><span className="text-neutral-600">Date:</span> {date}</div>
-                  <div><span className="text-neutral-600">Vehicle:</span> {vehicleLabel}</div>
-                  <div><span className="text-neutral-600">Odometer:</span> {odometer || "-"}</div>
-                  <div><span className="text-neutral-600">Generated:</span> {new Date().toLocaleString()}</div>
+                <div className="mt-3 text-sm">
+                  <div>
+                    <span className="text-neutral-600">User:</span> {profile.user || "-"}
+                  </div>
+                  <div>
+                    <span className="text-neutral-600">Date:</span> {date}
+                  </div>
+                  <div>
+                    <span className="text-neutral-600">Vehicle:</span> {vehicleLabel}
+                  </div>
+                  <div>
+                    <span className="text-neutral-600">Odometer:</span> {odometer || "-"}
+                  </div>
+                  <div>
+                    <span className="text-neutral-600">Generated:</span> {new Date().toLocaleString()}
+                  </div>
                 </div>
 
                 {generalNotes && (
                   <div className="mt-4 text-sm">
                     <div className="font-semibold">General notes</div>
-                    <div className="text-neutral-700">{generalNotes}</div>
+                    <div className="text-neutral-700 whitespace-pre-wrap">{generalNotes}</div>
                   </div>
                 )}
+
+                <div className="mt-4 rounded-2xl border border-neutral-200 p-3 text-sm">
+                  <div className="font-semibold">Summary</div>
+                  <div className="mt-1 text-neutral-700">
+                    Items: {doneCount}/{totalItems} • Issues: {issueCount}
+                  </div>
+                </div>
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
                   {draft.sections.map((s) => (
@@ -631,7 +641,10 @@ export default function App() {
                       <div className="font-semibold">{s.title}</div>
                       <div className="mt-2 space-y-2">
                         {s.items.map((it) => (
-                          <div key={it.id} className="text-sm flex items-start justify-between gap-3 border-t pt-2 first:border-t-0 first:pt-0">
+                          <div
+                            key={it.id}
+                            className="text-sm flex items-start justify-between gap-3 border-t pt-2 first:border-t-0 first:pt-0"
+                          >
                             <div>
                               <div className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</div>
                               {it.note && <div className="text-neutral-600">{it.note}</div>}
@@ -665,6 +678,7 @@ export default function App() {
           </div>
         )}
 
+        {/* Footer link */}
         <div className="mt-6 text-sm text-neutral-600">
           <a className="underline hover:text-neutral-900" href={HUB_URL} target="_blank" rel="noreferrer">
             Return to ToolStack hub
