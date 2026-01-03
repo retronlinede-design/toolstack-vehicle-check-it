@@ -10,9 +10,10 @@ const APP_VERSION = "v1";
 const KEY = `toolstack.${APP_ID}.${APP_VERSION}`;
 const PROFILE_KEY = "toolstack.profile.v1";
 
-// Optional: set later
+// Put your real ToolStack hub URL here (Wix page)
 const HUB_URL = "https://YOUR-WIX-HUB-URL-HERE";
 
+// ---------- utils ----------
 function safeParse(raw, fallback) {
   try {
     return raw ? JSON.parse(raw) : fallback;
@@ -25,6 +26,16 @@ function isoToday() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const uid = (prefix = "id") => {
+  try {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  } catch {
+    // ignore
+  }
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+// ---------- profile / template / state ----------
 function loadProfile() {
   return (
     safeParse(localStorage.getItem(PROFILE_KEY), null) || {
@@ -41,8 +52,8 @@ function loadProfile() {
 }
 
 function defaultTemplate() {
-  const sid = () => crypto?.randomUUID?.() || `s-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  const iid = () => crypto?.randomUUID?.() || `i-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const sid = () => uid("s");
+  const iid = () => uid("i");
 
   return {
     name: "Default Vehicle Check",
@@ -112,7 +123,7 @@ function loadState() {
 }
 
 function saveState(state) {
-  const next = { ...state, meta: { ...state.meta, updatedAt: new Date().toISOString() } };
+  const next = { ...state, meta: { ...(state.meta || {}), updatedAt: new Date().toISOString() } };
   localStorage.setItem(KEY, JSON.stringify(next));
   return next;
 }
@@ -129,13 +140,97 @@ function labelFor(sev) {
   return "OK";
 }
 
-// Shared styling tokens (match Inspect-It / Debt-It styled v1)
+// ---------- UI tokens (Styled v1) ----------
 const btnSecondary =
-  "px-3 py-2 rounded-xl bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50 active:translate-y-[1px] transition";
+  "px-3 py-2 rounded-xl bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50 active:translate-y-[1px] transition disabled:opacity-50 disabled:cursor-not-allowed";
 const btnPrimary =
-  "px-3 py-2 rounded-xl bg-neutral-900 text-white border border-neutral-900 shadow-sm hover:bg-neutral-800 active:translate-y-[1px] transition";
+  "px-3 py-2 rounded-xl bg-neutral-900 text-white border border-neutral-900 shadow-sm hover:bg-neutral-800 active:translate-y-[1px] transition disabled:opacity-50 disabled:cursor-not-allowed";
+const btnDanger =
+  "px-3 py-2 rounded-xl bg-red-50 text-red-700 border border-red-200 shadow-sm hover:bg-red-100 active:translate-y-[1px] transition disabled:opacity-50 disabled:cursor-not-allowed";
 const inputBase =
   "w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 bg-white focus:outline-none focus:ring-2 focus:ring-lime-400/25 focus:border-neutral-300";
+
+// ---------- Report Sheet ----------
+function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, draft, totals, storageKey }) {
+  return (
+    <div className="mx-auto max-w-4xl">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="text-2xl font-semibold text-neutral-900">{profile.org || "ToolStack"}</div>
+          <div className="text-sm text-neutral-600">Vehicle Check Report</div>
+          <div className="mt-3 h-[2px] w-72 rounded-full bg-gradient-to-r from-lime-400/0 via-lime-400 to-emerald-400/0" />
+        </div>
+        <div className="text-sm text-neutral-600">Generated: {new Date().toLocaleString()}</div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-neutral-200 p-4">
+          <div className="text-sm text-neutral-600">Prepared by</div>
+          <div className="text-lg font-semibold text-neutral-900 mt-1">{profile.user || "—"}</div>
+        </div>
+        <div className="rounded-2xl border border-neutral-200 p-4">
+          <div className="text-sm text-neutral-600">Vehicle</div>
+          <div className="text-sm text-neutral-900 mt-1">{vehicleLabel || "—"}</div>
+          <div className="text-xs text-neutral-600 mt-1">Date: {date || "—"}</div>
+        </div>
+        <div className="rounded-2xl border border-neutral-200 p-4">
+          <div className="text-sm text-neutral-600">Summary</div>
+          <div className="text-sm text-neutral-900 mt-1">
+            Items: <span className="font-semibold">{totals.doneCount}</span>/{totals.totalItems} • Issues:{" "}
+            <span className="font-semibold">{totals.issueCount}</span>
+          </div>
+          <div className="text-xs text-neutral-600 mt-1">Odometer: {odometer || "—"}</div>
+        </div>
+      </div>
+
+      {generalNotes ? (
+        <div className="mt-4 rounded-2xl border border-neutral-200 p-4 text-sm">
+          <div className="font-semibold text-neutral-900">General notes</div>
+          <div className="mt-1 text-neutral-700 whitespace-pre-wrap">{generalNotes}</div>
+        </div>
+      ) : null}
+
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        {draft.sections.map((s) => (
+          <div key={s.id} className="rounded-2xl border border-neutral-200 p-3">
+            <div className="font-semibold">{s.title}</div>
+            <div className="mt-2 space-y-2">
+              {s.items.map((it) => (
+                <div
+                  key={it.id}
+                  className="text-sm flex items-start justify-between gap-3 border-t pt-2 first:border-t-0 first:pt-0"
+                >
+                  <div>
+                    <div className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</div>
+                    {it.note ? <div className="text-neutral-600 whitespace-pre-wrap">{it.note}</div> : null}
+                  </div>
+                  <span className={"text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>
+                    {labelFor(it.severity)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 grid grid-cols-2 gap-6 text-sm">
+        <div>
+          <div className="text-neutral-600">Prepared by</div>
+          <div className="mt-8 border-t pt-2">Signature</div>
+        </div>
+        <div>
+          <div className="text-neutral-600">Approved by</div>
+          <div className="mt-8 border-t pt-2">Signature</div>
+        </div>
+      </div>
+
+      <div className="mt-6 text-xs text-neutral-500">
+        Storage key: <span className="font-mono">{storageKey}</span>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [profile, setProfile] = useState(loadProfile());
@@ -147,6 +242,8 @@ export default function App() {
   const [generalNotes, setGeneralNotes] = useState("");
 
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+
   const fileRef = useRef(null);
 
   // Persist shared profile
@@ -169,10 +266,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicles]);
 
-  const vehicleLabel = useMemo(
-    () => vehicles.find((v) => v.id === vehicleId)?.label || "-",
-    [vehicles, vehicleId]
-  );
+  const vehicleLabel = useMemo(() => vehicles.find((v) => v.id === vehicleId)?.label || "-", [vehicles, vehicleId]);
 
   // Draft check (mutable per item)
   const [draft, setDraft] = useState(() => {
@@ -180,8 +274,6 @@ export default function App() {
     return {
       date,
       vehicleId,
-      odometer: "",
-      generalNotes: "",
       sections: t.sections.map((s) => ({
         id: s.id,
         title: s.title,
@@ -219,6 +311,11 @@ export default function App() {
     return n;
   }, [draft.sections]);
 
+  const totalsForPreview = useMemo(
+    () => ({ issueCount, doneCount, totalItems }),
+    [issueCount, doneCount, totalItems]
+  );
+
   function updateItem(sectionId, itemId, patch) {
     setDraft((d) => ({
       ...d,
@@ -238,8 +335,6 @@ export default function App() {
     setDraft({
       date,
       vehicleId,
-      odometer: "",
-      generalNotes: "",
       sections: t.sections.map((s) => ({
         id: s.id,
         title: s.title,
@@ -258,7 +353,7 @@ export default function App() {
 
   function saveCheck() {
     const check = {
-      id: crypto?.randomUUID?.() || String(Date.now()),
+      id: uid("vc"),
       createdAt: new Date().toISOString(),
       date,
       vehicleId,
@@ -280,6 +375,8 @@ export default function App() {
   }
 
   function deleteCheck(id) {
+    const ok = window.confirm("Delete this saved check?");
+    if (!ok) return;
     setState((prev) => saveState({ ...prev, checks: (prev.checks || []).filter((c) => c.id !== id) }));
   }
 
@@ -311,10 +408,27 @@ export default function App() {
     reader.readAsText(file);
   }
 
-  function printPreview() {
+  const openPreview = () => setPreviewOpen(true);
+
+  const printFromPreview = () => {
     setPreviewOpen(true);
     setTimeout(() => window.print(), 50);
-  }
+  };
+
+  const resetAppData = () => {
+    const ok = window.confirm(
+      "Reset all Vehicle Check-It data on this device?\n\nThis clears saved checks for this app.\n(Your shared profile may still be used by other ToolStack apps.)"
+    );
+    if (!ok) return;
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      // ignore
+    }
+    setState(loadState());
+    resetDraft();
+    setHelpOpen(false);
+  };
 
   const moduleManifest = useMemo(
     () => ({
@@ -329,73 +443,188 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900">
+      <style>{`
+        @media print {
+          body { background: white !important; }
+          .print\\:hidden { display: none !important; }
+          .print\\:shadow-none { box-shadow: none !important; }
+          .print\\:border-none { border: none !important; }
+          .print\\:p-0 { padding: 0 !important; }
+        }
+      `}</style>
+
+      {previewOpen ? (
+        <style>{`
+          @media print {
+            body * { visibility: hidden !important; }
+            #vc-print-preview, #vc-print-preview * { visibility: visible !important; }
+            #vc-print-preview { position: absolute !important; left: 0; top: 0; width: 100%; }
+          }
+        `}</style>
+      ) : null}
+
+      {/* Help Modal */}
+      {helpOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setHelpOpen(false)} />
+          <div className="relative w-full max-w-2xl bg-white rounded-2xl border border-neutral-200 shadow-xl overflow-hidden">
+            <div className="p-4 border-b flex items-center justify-between gap-3">
+              <div className="font-semibold">Help</div>
+              <button className={btnSecondary} onClick={() => setHelpOpen(false)}>
+                Close
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4 text-sm">
+              <div className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
+                <div className="font-semibold text-neutral-900">How saving works</div>
+                <ul className="mt-2 space-y-1 text-neutral-700 list-disc pl-5">
+                  <li>This app is offline-first. It auto-saves to your browser on this device.</li>
+                  <li>Use Export/Import as your backup/restore system.</li>
+                  <li>No login: if you clear browser storage, data can be lost unless you exported.</li>
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-neutral-200 p-4">
+                <div className="font-semibold text-neutral-900">Recommended routine</div>
+                <ul className="mt-2 space-y-1 text-neutral-700 list-disc pl-5">
+                  <li>Use daily as normal.</li>
+                  <li>Export once a week (or after important checks).</li>
+                  <li>Import into a new browser/profile to verify your backup occasionally.</li>
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-neutral-200 p-4">
+                <div className="font-semibold text-neutral-900">Storage keys</div>
+                <div className="mt-2 text-neutral-700">
+                  <div>
+                    App: <span className="font-mono">{KEY}</span>
+                  </div>
+                  <div>
+                    Shared profile: <span className="font-mono">{PROFILE_KEY}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 justify-end">
+                <button className={btnSecondary} onClick={exportJSON}>
+                  Export now
+                </button>
+                <button className={btnDanger} onClick={resetAppData}>
+                  Reset app data
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Preview Modal */}
+      {previewOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setPreviewOpen(false)} />
+
+          <div className="relative w-full max-w-5xl">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div className="text-lg font-semibold text-white">Print preview</div>
+              <div className="flex items-center gap-2">
+                <button
+                  className="px-3 py-2 rounded-xl text-sm font-medium border border-white/40 bg-white/10 hover:bg-white/15 text-white transition"
+                  onClick={() => window.print()}
+                >
+                  Print / Save PDF
+                </button>
+                <button
+                  className="px-3 py-2 rounded-xl text-sm font-medium border border-white/40 bg-white/10 hover:bg-white/15 text-white transition"
+                  onClick={() => setPreviewOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-white border border-neutral-200 shadow-lg overflow-auto max-h-[80vh]">
+              <div id="vc-print-preview" className="p-6">
+                <ReportSheet
+                  profile={profile}
+                  date={date}
+                  vehicleLabel={vehicleLabel}
+                  odometer={String(odometer || "").trim()}
+                  generalNotes={String(generalNotes || "").trim()}
+                  draft={draft}
+                  totals={totalsForPreview}
+                  storageKey={KEY}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="max-w-6xl mx-auto p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-2xl font-bold tracking-tight">Vehicle Check-It</div>
+            <div className="text-2xl font-semibold tracking-tight">Vehicle Check-It</div>
             <div className="text-sm text-neutral-600">
               Module-ready ({moduleManifest.id}.{moduleManifest.version}) • Offline-first • Export/Import + Print
             </div>
             <div className="mt-3 h-[2px] w-80 rounded-full bg-gradient-to-r from-lime-400/0 via-lime-400 to-emerald-400/0" />
           </div>
 
-          <div className="flex flex-wrap gap-2 justify-end">
-            <button className={btnSecondary} onClick={() => setPreviewOpen(true)}>
-              Preview
-            </button>
-            <button className={btnSecondary} onClick={printPreview}>
-              Print / Save PDF
-            </button>
-            <button className={btnSecondary} onClick={exportJSON}>
-              Export
-            </button>
-            <button className={btnPrimary} onClick={() => fileRef.current?.click()}>
-              Import
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="application/json"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) importJSON(f);
-                e.target.value = "";
-              }}
-            />
+          {/* Top actions grid (standard) */}
+          <div className="w-full sm:w-auto">
+            <div className="grid grid-cols-5 gap-2 justify-items-stretch">
+              <button className={btnSecondary} onClick={openPreview}>
+                Preview
+              </button>
+              <button className={btnSecondary} onClick={printFromPreview}>
+                Print / Save PDF
+              </button>
+              <button className={btnSecondary} onClick={exportJSON}>
+                Export
+              </button>
+              <button className={btnSecondary} onClick={() => fileRef.current?.click()}>
+                Import
+              </button>
+              <button className={btnSecondary} onClick={() => setHelpOpen(true)} title="Help">
+                ?
+              </button>
+
+              <input
+                ref={fileRef}
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) importJSON(f);
+                  e.target.value = "";
+                }}
+              />
+            </div>
           </div>
         </div>
 
         {/* Main grid */}
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Profile */}
-          <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4">
+          <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 print:shadow-none">
             <div className="font-semibold">Profile (shared)</div>
             <div className="mt-3 space-y-2">
               <label className="block text-sm">
                 <div className="text-neutral-600">Organization</div>
-                <input
-                  className={inputBase}
-                  value={profile.org}
-                  onChange={(e) => setProfile({ ...profile, org: e.target.value })}
-                />
+                <input className={inputBase} value={profile.org} onChange={(e) => setProfile({ ...profile, org: e.target.value })} />
               </label>
+
               <label className="block text-sm">
                 <div className="text-neutral-600">User</div>
-                <input
-                  className={inputBase}
-                  value={profile.user}
-                  onChange={(e) => setProfile({ ...profile, user: e.target.value })}
-                />
+                <input className={inputBase} value={profile.user} onChange={(e) => setProfile({ ...profile, user: e.target.value })} />
               </label>
+
               <label className="block text-sm">
                 <div className="text-neutral-600">Language</div>
-                <select
-                  className={inputBase}
-                  value={profile.language}
-                  onChange={(e) => setProfile({ ...profile, language: e.target.value })}
-                >
+                <select className={inputBase} value={profile.language} onChange={(e) => setProfile({ ...profile, language: e.target.value })}>
                   <option value="EN">EN</option>
                   <option value="DE">DE</option>
                 </select>
@@ -408,7 +637,7 @@ export default function App() {
           </div>
 
           {/* New check */}
-          <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 lg:col-span-3">
+          <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 lg:col-span-3 print:shadow-none">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <div className="font-semibold">New vehicle check</div>
@@ -420,21 +649,12 @@ export default function App() {
               <div className="flex flex-wrap gap-2">
                 <label className="text-sm">
                   <div className="text-neutral-600">Date</div>
-                  <input
-                    type="date"
-                    className={inputBase}
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                  />
+                  <input type="date" className={inputBase} value={date} onChange={(e) => setDate(e.target.value)} />
                 </label>
 
                 <label className="text-sm">
                   <div className="text-neutral-600">Vehicle</div>
-                  <select
-                    className={inputBase}
-                    value={vehicleId}
-                    onChange={(e) => setVehicleId(e.target.value)}
-                  >
+                  <select className={inputBase} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
                     {vehicles.map((v) => (
                       <option key={v.id} value={v.id}>
                         {v.label}
@@ -481,9 +701,7 @@ export default function App() {
                               checked={it.done}
                               onChange={(e) => updateItem(s.id, it.id, { done: e.target.checked })}
                             />
-                            <span className={it.done ? "line-through text-neutral-500" : ""}>
-                              {it.label}
-                            </span>
+                            <span className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</span>
                           </label>
 
                           <div className="flex items-center gap-2">
@@ -502,14 +720,14 @@ export default function App() {
                           </div>
                         </div>
 
-                        {(it.severity === "note" || it.severity === "issue") && (
+                        {it.severity !== "ok" ? (
                           <input
                             className="mt-2 w-full px-3 py-2 rounded-xl border border-neutral-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-lime-400/25"
                             placeholder={it.severity === "issue" ? "Describe the issue" : "Add a note"}
                             value={it.note}
                             onChange={(e) => updateItem(s.id, it.id, { note: e.target.value })}
                           />
-                        )}
+                        ) : null}
                       </div>
                     ))}
                   </div>
@@ -530,10 +748,10 @@ export default function App() {
         </div>
 
         {/* Saved checks */}
-        <div className="mt-4 bg-white border border-neutral-200 rounded-2xl shadow-sm p-4">
+        <div className="mt-4 bg-white border border-neutral-200 rounded-2xl shadow-sm p-4 print:shadow-none">
           <div className="font-semibold">Saved checks</div>
 
-          {state.checks.length === 0 ? (
+          {(state.checks || []).length === 0 ? (
             <div className="mt-2 text-sm text-neutral-500">No saved checks yet.</div>
           ) : (
             <div className="mt-3 overflow-auto">
@@ -549,7 +767,7 @@ export default function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {state.checks.map((c) => (
+                  {(state.checks || []).map((c) => (
                     <tr key={c.id} className="border-b last:border-b-0">
                       <td className="py-2 pr-2 font-medium">{c.date}</td>
                       <td className="py-2 pr-2">{c.vehicleLabel || c.vehicleId}</td>
@@ -570,7 +788,7 @@ export default function App() {
                         {c.summary?.doneCount || 0}/{c.summary?.totalItems || 0}
                       </td>
                       <td className="py-2 pr-2 text-right">
-                        <button className="px-3 py-1.5 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-50" onClick={() => deleteCheck(c.id)}>
+                        <button className={btnDanger} onClick={() => deleteCheck(c.id)}>
                           Delete
                         </button>
                       </td>
@@ -582,107 +800,14 @@ export default function App() {
           )}
         </div>
 
-        {/* Preview modal */}
-        {previewOpen && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-3 z-50">
-            <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
-              <div className="p-3 border-b flex items-center justify-between">
-                <div className="font-semibold">Preview — Vehicle Check Report</div>
-                <div className="flex gap-2">
-                  <button className={btnSecondary} onClick={printPreview}>
-                    Print / Save PDF
-                  </button>
-                  <button className={btnPrimary} onClick={() => setPreviewOpen(false)}>
-                    Close
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-6 overflow-auto max-h-[80vh]">
-                <div className="text-xl font-bold">{profile.org || "ToolStack"}</div>
-                <div className="text-sm text-neutral-600">Vehicle Check Report</div>
-                <div className="mt-2 h-[2px] w-72 rounded-full bg-gradient-to-r from-lime-400/0 via-lime-400 to-emerald-400/0" />
-
-                <div className="mt-3 text-sm">
-                  <div>
-                    <span className="text-neutral-600">User:</span> {profile.user || "-"}
-                  </div>
-                  <div>
-                    <span className="text-neutral-600">Date:</span> {date}
-                  </div>
-                  <div>
-                    <span className="text-neutral-600">Vehicle:</span> {vehicleLabel}
-                  </div>
-                  <div>
-                    <span className="text-neutral-600">Odometer:</span> {odometer || "-"}
-                  </div>
-                  <div>
-                    <span className="text-neutral-600">Generated:</span> {new Date().toLocaleString()}
-                  </div>
-                </div>
-
-                {generalNotes && (
-                  <div className="mt-4 text-sm">
-                    <div className="font-semibold">General notes</div>
-                    <div className="text-neutral-700 whitespace-pre-wrap">{generalNotes}</div>
-                  </div>
-                )}
-
-                <div className="mt-4 rounded-2xl border border-neutral-200 p-3 text-sm">
-                  <div className="font-semibold">Summary</div>
-                  <div className="mt-1 text-neutral-700">
-                    Items: {doneCount}/{totalItems} • Issues: {issueCount}
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {draft.sections.map((s) => (
-                    <div key={s.id} className="rounded-2xl border border-neutral-200 p-3">
-                      <div className="font-semibold">{s.title}</div>
-                      <div className="mt-2 space-y-2">
-                        {s.items.map((it) => (
-                          <div
-                            key={it.id}
-                            className="text-sm flex items-start justify-between gap-3 border-t pt-2 first:border-t-0 first:pt-0"
-                          >
-                            <div>
-                              <div className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</div>
-                              {it.note && <div className="text-neutral-600">{it.note}</div>}
-                            </div>
-                            <span className={"text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>
-                              {labelFor(it.severity)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-6 text-sm">
-                  <div>
-                    <div className="text-neutral-600">Prepared by</div>
-                    <div className="mt-8 border-t pt-2">Signature</div>
-                  </div>
-                  <div>
-                    <div className="text-neutral-600">Approved by</div>
-                    <div className="mt-8 border-t pt-2">Signature</div>
-                  </div>
-                </div>
-
-                <div className="mt-6 text-xs text-neutral-500">
-                  Storage key: <span className="font-mono">{KEY}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Footer link */}
-        <div className="mt-6 text-sm text-neutral-600">
+        <div className="mt-6 flex items-center justify-between gap-3 text-sm text-neutral-600">
           <a className="underline hover:text-neutral-900" href={HUB_URL} target="_blank" rel="noreferrer">
             Return to ToolStack hub
           </a>
+          <div className="text-xs text-neutral-500">
+            Storage key: <span className="font-mono">{KEY}</span>
+          </div>
         </div>
       </div>
     </div>
