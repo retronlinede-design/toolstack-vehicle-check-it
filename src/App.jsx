@@ -752,7 +752,7 @@ export default function App() {
             <div className="text-sm text-neutral-600"></div>
             <div className="text-4xl sm:text-5xl font-black tracking-tight text-neutral-700">
               <span>Vehicle-Check</span>
-              <span className="text-[D#5FF00]">It</span>
+              <span className="text-[#D5FF00]">It</span>
             </div>
             <div className="text-sm text-neutral-700">Safety inspection list for your vehicle</div>
             <div className="mt-3 h-[2px] w-80 rounded-full bg-gradient-to-r from-lime-400/0 via-lime-400 to-emerald-400/0" />
