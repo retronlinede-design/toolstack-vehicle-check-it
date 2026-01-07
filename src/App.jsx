@@ -21,7 +21,7 @@ const APP_VERSION = "v1";
 // Per-module storage namespace
 const KEY = `toolstack.${APP_ID}.${APP_VERSION}`;
 
-// Shared profile key (kept for later ToolStack consolidation; no UI section shown)
+// Shared profile key (kept for later ToolStack consolidation)
 const PROFILE_KEY = "toolstack.profile.v1";
 
 // Put your real ToolStack hub URL here (Wix page)
@@ -41,6 +41,21 @@ const FUEL_OPTIONS = [
   "Wasserstoff",
   "Sonstiges",
 ];
+
+// Vehicle profile template
+const blankVehicle = () => ({
+  id: "",
+  label: "",
+  plate: "",
+  make: "",
+  model: "",
+  fuelType: FUEL_OPTIONS[0],
+  year: "",
+  vin: "",
+  tuvUntil: "",
+  serviceDue: "",
+  notes: "",
+});
 
 // ---------- utils ----------
 function safeParse(raw, fallback) {
@@ -110,22 +125,30 @@ function runSelfTests() {
 
   // safeParse
   assert("safeParse returns fallback on invalid JSON", safeParse("{bad}", 123) === 123);
-  assert("safeParse parses valid JSON", safeParse("{\"a\":1}", null)?.a === 1);
+  assert("safeParse parses valid JSON", safeParse('{"a":1}', null)?.a === 1);
 
   // normalizeVehicleId
   const id1 = normalizeVehicleId(" M-AB 1234 ");
   assert("normalizeVehicleId produces non-empty", typeof id1 === "string" && id1.length > 0);
   assert("normalizeVehicleId strips spaces/symbols", id1.includes(" ") === false);
+  const id2 = normalizeVehicleId("");
+  assert("normalizeVehicleId falls back when empty", typeof id2 === "string" && id2.length > 0);
 
   // formatVehicleLabel
   assert(
     "formatVehicleLabel uses plate + make/model",
     formatVehicleLabel({ plate: "M-AB 1", make: "BMW", model: "530i" }).includes("M-AB 1")
   );
-  assert(
-    "formatVehicleLabel falls back to label",
-    formatVehicleLabel({ label: "TestCar" }).includes("TestCar")
-  );
+  assert("formatVehicleLabel falls back to label", formatVehicleLabel({ label: "TestCar" }).includes("TestCar"));
+  assert("formatVehicleLabel handles plate only", formatVehicleLabel({ plate: "M-AB 9" }).includes("M-AB 9"));
+
+  // badge/label
+  assert("labelFor(issue) is Issue", labelFor("issue") === "Issue");
+  assert("badgeFor(note) contains amber", badgeFor("note").includes("amber"));
+
+  // blankVehicle
+  const bv = blankVehicle();
+  assert("blankVehicle has fuelType", typeof bv.fuelType === "string" && bv.fuelType.length > 0);
 
   // fuel options basic
   assert("FUEL_OPTIONS includes 95 Super", FUEL_OPTIONS.includes("95 Super"));
@@ -198,13 +221,7 @@ function defaultTemplate() {
 
 function loadProfile() {
   if (typeof window === "undefined") {
-    return {
-      org: "ToolStack",
-      user: "",
-      language: "EN",
-      logo: "",
-      vehicles: [],
-    };
+    return { org: "ToolStack", user: "", language: "EN", logo: "", vehicles: [] };
   }
 
   return (
@@ -263,7 +280,11 @@ function loadState() {
 
 function saveState(state) {
   const next = { ...state, meta: { ...(state.meta || {}), updatedAt: new Date().toISOString() } };
-  localStorage.setItem(KEY, JSON.stringify(next));
+  try {
+    if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
   return next;
 }
 
@@ -290,10 +311,10 @@ function Pill({ children, tone = "default" }) {
     tone === "accent"
       ? "border-[#D5FF00]/40 bg-[#D5FF00]/10 text-neutral-800"
       : tone === "warn"
-      ? "border-amber-200 bg-amber-50 text-neutral-800"
-      : tone === "danger"
-      ? "border-red-200 bg-red-50 text-neutral-800"
-      : "border-neutral-200 bg-white text-neutral-800";
+        ? "border-amber-200 bg-amber-50 text-neutral-800"
+        : tone === "danger"
+          ? "border-red-200 bg-red-50 text-neutral-800"
+          : "border-neutral-200 bg-white text-neutral-800";
 
   return (
     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${cls}`}>
@@ -313,8 +334,8 @@ function ActionButton({ children, onClick, tone = "default", disabled, title }) 
     tone === "primary"
       ? "bg-neutral-700 hover:bg-[#D5FF00] hover:border-[#D5FF00] hover:text-neutral-900 text-white border-neutral-700"
       : tone === "danger"
-      ? "bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
-      : "bg-white hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] text-neutral-700 border-neutral-200";
+        ? "bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+        : "bg-white hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] text-neutral-700 border-neutral-200";
 
   return (
     <button type="button" onClick={onClick} disabled={disabled} title={title} className={`${ACTION_BASE} ${cls}`}>
@@ -503,6 +524,246 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
   );
 }
 
+// ---------- Vehicle Profiles Modal (discrete profile editor) ----------
+function VehicleProfilesModal({
+  open,
+  onClose,
+  vehicles,
+  activeVehicleId,
+  onSelectActive,
+  onStartAdd,
+  onStartEdit,
+  onDelete,
+  mode,
+  draft,
+  setDraft,
+  onSave,
+  onCancelEdit,
+}) {
+  if (!open) return null;
+
+  const isEditing = mode === "add" || mode === "edit";
+  const requiredOk =
+    String(draft.plate || "").trim() || String(draft.make || "").trim() || String(draft.model || "").trim();
+
+  const Field = ({ label, children }) => (
+    <label className="block text-sm">
+      <div className="text-neutral-700 font-medium">{label}</div>
+      {children}
+    </label>
+  );
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
+        <div className="w-full max-w-5xl rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden">
+          {/* Header */}
+          <div className="p-4 border-b border-neutral-100 flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm text-neutral-500">Vehicle profiles • stored locally</div>
+              <h2 className="text-lg font-semibold text-neutral-900">Manage vehicles</h2>
+              <div className="mt-3 h-[2px] w-56 rounded-full bg-gradient-to-r from-[#D5FF00]/0 via-[#D5FF00] to-[#D5FF00]/0" />
+              <div className="mt-2 text-xs text-neutral-500">
+                Stored in <span className="font-mono">{PROFILE_KEY}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {!isEditing ? (
+                <button className={btnSecondary} onClick={onStartAdd}>
+                  Add vehicle
+                </button>
+              ) : (
+                <button className={btnSecondary} onClick={onCancelEdit}>
+                  Back
+                </button>
+              )}
+              <button className={btnSecondary} onClick={onClose}>
+                Close
+              </button>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="p-4 max-h-[75vh] overflow-auto">
+            {!isEditing ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+                  <div className="text-sm font-semibold text-neutral-800">Your vehicles</div>
+                  {vehicles.length === 0 ? (
+                    <div className="mt-2 text-sm text-neutral-600">No vehicles yet. Click “Add vehicle”.</div>
+                  ) : (
+                    <div className="mt-3 space-y-2">
+                      {vehicles.map((v) => (
+                        <div key={v.id} className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold text-neutral-800 truncate">{formatVehicleLabel(v)}</div>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {v.fuelType ? <Pill tone="accent">{v.fuelType}</Pill> : null}
+                                {v.tuvUntil ? <Pill>TÜV: {v.tuvUntil}</Pill> : null}
+                                {v.serviceDue ? <Pill>Service: {v.serviceDue}</Pill> : null}
+                                {v.id === activeVehicleId ? <Pill tone="accent">Active</Pill> : null}
+                              </div>
+                              {v.notes ? (
+                                <div className="mt-2 text-xs text-neutral-600 whitespace-pre-wrap">{v.notes}</div>
+                              ) : null}
+                              <div className="mt-2 text-[11px] text-neutral-500 font-mono truncate">{v.id}</div>
+                            </div>
+
+                            <div className="shrink-0 flex flex-col gap-2">
+                              {v.id !== activeVehicleId ? (
+                                <button className={btnSecondary} onClick={() => onSelectActive(v.id)}>
+                                  Set active
+                                </button>
+                              ) : null}
+                              <button className={btnSecondary} onClick={() => onStartEdit(v)}>
+                                Edit
+                              </button>
+                              <button className={btnDanger} onClick={() => onDelete(v.id)}>
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+                  <div className="text-sm font-semibold text-neutral-800">How it works</div>
+                  <div className="mt-2 text-sm text-neutral-700 space-y-2">
+                    <p>
+                      Vehicle profiles are saved in your browser on this device. You can edit them anytime, and pick the
+                      <b> Active vehicle</b> for the next checks.
+                    </p>
+                    <p>
+                      Tip: keep plate + make/model filled so the labels stay clean in your history and reports.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="max-w-3xl">
+                <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+                  <div className="text-sm font-semibold text-neutral-800">
+                    {mode === "add" ? "Add vehicle" : "Edit vehicle"}
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Field label="Number plate">
+                      <input
+                        className={inputBase}
+                        placeholder="e.g., M-AB 1234"
+                        value={draft.plate}
+                        onChange={(e) => setDraft((d) => ({ ...d, plate: e.target.value }))}
+                      />
+                    </Field>
+
+                    <Field label="Fuel type">
+                      <select
+                        className={inputBase}
+                        value={draft.fuelType}
+                        onChange={(e) => setDraft((d) => ({ ...d, fuelType: e.target.value }))}
+                      >
+                        {FUEL_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+
+                    <Field label="Make">
+                      <input
+                        className={inputBase}
+                        placeholder="e.g., BMW"
+                        value={draft.make}
+                        onChange={(e) => setDraft((d) => ({ ...d, make: e.target.value }))}
+                      />
+                    </Field>
+
+                    <Field label="Model">
+                      <input
+                        className={inputBase}
+                        placeholder="e.g., 530i"
+                        value={draft.model}
+                        onChange={(e) => setDraft((d) => ({ ...d, model: e.target.value }))}
+                      />
+                    </Field>
+
+                    <Field label="TÜV valid until">
+                      <input
+                        type="date"
+                        className={inputBase}
+                        value={draft.tuvUntil}
+                        onChange={(e) => setDraft((d) => ({ ...d, tuvUntil: e.target.value }))}
+                      />
+                    </Field>
+
+                    <Field label="Service due">
+                      <input
+                        type="date"
+                        className={inputBase}
+                        value={draft.serviceDue}
+                        onChange={(e) => setDraft((d) => ({ ...d, serviceDue: e.target.value }))}
+                      />
+                    </Field>
+
+                    <Field label="Year">
+                      <input
+                        className={inputBase}
+                        placeholder="e.g., 2023"
+                        value={draft.year}
+                        onChange={(e) => setDraft((d) => ({ ...d, year: e.target.value }))}
+                      />
+                    </Field>
+
+                    <Field label="VIN (optional)">
+                      <input
+                        className={inputBase}
+                        placeholder="Vehicle Identification Number"
+                        value={draft.vin}
+                        onChange={(e) => setDraft((d) => ({ ...d, vin: e.target.value }))}
+                      />
+                    </Field>
+                  </div>
+
+                  <Field label="Notes (optional)">
+                    <textarea
+                      className={inputBase + " min-h-[100px]"}
+                      placeholder="Anything useful (tyre size, quirks, fuel card, etc.)"
+                      value={draft.notes}
+                      onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))}
+                    />
+                  </Field>
+
+                  <div className="mt-4 flex items-center justify-end gap-2">
+                    <button className={btnSecondary} onClick={onCancelEdit}>
+                      Cancel
+                    </button>
+                    <button className={btnSecondary} disabled={!requiredOk} onClick={onSave}>
+                      Save
+                    </button>
+                  </div>
+
+                  {!requiredOk ? (
+                    <div className="mt-3 text-xs text-neutral-600">
+                      Please enter at least a number plate or make/model.
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---------- Report Sheet ----------
 function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, draft, totals, storageKey }) {
   return (
@@ -589,17 +850,19 @@ function TestsPanel() {
   if (!isTestsMode()) return null;
   const results = runSelfTests();
   const passCount = results.filter((r) => r.pass).length;
+
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 mb-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <div className="text-sm font-semibold text-neutral-800">Self-tests</div>
-          <div className="text-xs text-neutral-600">
-            {passCount}/{results.length} passing — open console for details
-          </div>
+          <div className="text-xs text-neutral-600">{passCount}/{results.length} passing — open console for details</div>
         </div>
-        <Pill tone={passCount === results.length ? "accent" : "danger"}>{passCount === results.length ? "PASS" : "FAIL"}</Pill>
+        <Pill tone={passCount === results.length ? "accent" : "danger"}>
+          {passCount === results.length ? "PASS" : "FAIL"}
+        </Pill>
       </div>
+
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
         {results.map((r) => (
           <div key={r.name} className="rounded-xl border border-neutral-200 px-3 py-2 bg-neutral-50">
@@ -614,24 +877,18 @@ function TestsPanel() {
 
 export default function App() {
   const [profile, setProfile] = useState(loadProfile());
-  const [state, setState] = useState(loadState());
+  const [appState, setAppState] = useState(loadState());
 
   const [date, setDate] = useState(isoToday());
   const [vehicleId, setVehicleId] = useState(profile.vehicles?.[0]?.id || "");
   const [odometer, setOdometer] = useState("");
   const [generalNotes, setGeneralNotes] = useState("");
 
-  const [newVehicle, setNewVehicle] = useState({
-    plate: "",
-    make: "",
-    model: "",
-    fuelType: FUEL_OPTIONS[0],
-    year: "",
-    vin: "",
-    tuvUntil: "",
-    serviceDue: "",
-    notes: "",
-  });
+  // Vehicle profile modal
+  const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
+  const [vehicleModalMode, setVehicleModalMode] = useState("list"); // list | add | edit
+  const [vehicleEditId, setVehicleEditId] = useState(null);
+  const [vehicleDraft, setVehicleDraft] = useState(blankVehicle());
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -656,11 +913,11 @@ export default function App() {
   // Persist app state
   useEffect(() => {
     try {
-      localStorage.setItem(KEY, JSON.stringify(state));
+      localStorage.setItem(KEY, JSON.stringify(appState));
     } catch {
       // ignore
     }
-  }, [state]);
+  }, [appState]);
 
   const vehicles = useMemo(() => profile.vehicles || [], [profile.vehicles]);
 
@@ -679,7 +936,7 @@ export default function App() {
 
   // Draft check (mutable per item)
   const [draft, setDraft] = useState(() => {
-    const t = state.template;
+    const t = appState.template;
     return {
       date,
       vehicleId,
@@ -722,70 +979,6 @@ export default function App() {
 
   const totalsForPreview = useMemo(() => ({ issueCount, doneCount, totalItems }), [issueCount, doneCount, totalItems]);
 
-  function addVehicle() {
-    const plate = String(newVehicle.plate || "").trim().toUpperCase();
-    const make = String(newVehicle.make || "").trim();
-    const model = String(newVehicle.model || "").trim();
-
-    // Require at least one identifying field
-    if (!plate && !make && !model) {
-      alert("Please enter at least a number plate or make/model.");
-      return;
-    }
-
-    const label = [make, model].filter(Boolean).join(" ").trim() || plate || "Vehicle";
-    const idBase = normalizeVehicleId(plate || label);
-
-    const existingIds = (profile.vehicles || []).map((v) => v.id);
-    let id = idBase;
-    if (existingIds.includes(id)) id = `${idBase}-${Math.random().toString(16).slice(2, 6)}`;
-
-    const nextVehicle = {
-      id,
-      label,
-      plate,
-      make,
-      model,
-      fuelType: String(newVehicle.fuelType || "").trim(),
-      year: String(newVehicle.year || "").trim(),
-      vin: String(newVehicle.vin || "").trim(),
-      tuvUntil: String(newVehicle.tuvUntil || "").trim(),
-      serviceDue: String(newVehicle.serviceDue || "").trim(),
-      notes: String(newVehicle.notes || "").trim(),
-    };
-
-    const nextVehicles = [...(profile.vehicles || []), nextVehicle];
-    setProfile((p) => ({ ...p, vehicles: nextVehicles }));
-
-    // Reset form
-    setNewVehicle({
-      plate: "",
-      make: "",
-      model: "",
-      fuelType: FUEL_OPTIONS[0],
-      year: "",
-      vin: "",
-      tuvUntil: "",
-      serviceDue: "",
-      notes: "",
-    });
-
-    if (!vehicleId) setVehicleId(id);
-    notify("Vehicle added");
-  }
-
-  function deleteVehicle(vid) {
-    const v = (profile.vehicles || []).find((x) => x.id === vid);
-    const ok = window.confirm(`Delete vehicle: ${v?.label || vid}?`);
-    if (!ok) return;
-
-    const nextVehicles = (profile.vehicles || []).filter((x) => x.id !== vid);
-    setProfile((p) => ({ ...p, vehicles: nextVehicles }));
-
-    if (vehicleId === vid) setVehicleId(nextVehicles[0]?.id || "");
-    notify("Vehicle deleted");
-  }
-
   function updateItem(sectionId, itemId, patch) {
     setDraft((d) => ({
       ...d,
@@ -801,7 +994,7 @@ export default function App() {
   }
 
   function resetDraft() {
-    const t = state.template;
+    const t = appState.template;
     setDraft({
       date,
       vehicleId,
@@ -835,7 +1028,7 @@ export default function App() {
       summary: { totalItems, doneCount, issueCount },
     };
 
-    setState((prev) =>
+    setAppState((prev) =>
       saveState({
         ...prev,
         checks: [check, ...(prev.checks || [])],
@@ -849,12 +1042,12 @@ export default function App() {
   function deleteCheck(id) {
     const ok = window.confirm("Delete this saved check?");
     if (!ok) return;
-    setState((prev) => saveState({ ...prev, checks: (prev.checks || []).filter((c) => c.id !== id) }));
+    setAppState((prev) => saveState({ ...prev, checks: (prev.checks || []).filter((c) => c.id !== id) }));
     notify("Deleted");
   }
 
   function exportJSON() {
-    const payload = { exportedAt: new Date().toISOString(), profile, data: state };
+    const payload = { exportedAt: new Date().toISOString(), profile, data: appState };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -874,7 +1067,7 @@ export default function App() {
         const incoming = parsed?.data;
         if (!incoming?.checks || !Array.isArray(incoming.checks)) throw new Error("Invalid import file");
         setProfile(parsed?.profile || profile);
-        setState(saveState(incoming));
+        setAppState(saveState(incoming));
         resetDraft();
         notify("Imported");
       } catch (e) {
@@ -894,6 +1087,134 @@ export default function App() {
     window.open(HUB_URL, "_blank", "noopener,noreferrer");
   };
 
+  // ----- Vehicle profile actions (discrete) -----
+  const openVehicleManager = () => {
+    setVehicleModalOpen(true);
+    setVehicleModalMode("list");
+    setVehicleEditId(null);
+    setVehicleDraft(blankVehicle());
+  };
+
+  const startAddVehicle = () => {
+    setVehicleModalOpen(true);
+    setVehicleModalMode("add");
+    setVehicleEditId(null);
+    setVehicleDraft(blankVehicle());
+  };
+
+  const startEditVehicle = (v) => {
+    setVehicleModalOpen(true);
+    setVehicleModalMode("edit");
+    setVehicleEditId(v?.id || null);
+    setVehicleDraft({
+      id: v?.id || "",
+      label: v?.label || "",
+      plate: v?.plate || "",
+      make: v?.make || "",
+      model: v?.model || "",
+      fuelType: v?.fuelType || FUEL_OPTIONS[0],
+      year: v?.year || "",
+      vin: v?.vin || "",
+      tuvUntil: v?.tuvUntil || "",
+      serviceDue: v?.serviceDue || "",
+      notes: v?.notes || "",
+    });
+  };
+
+  const cancelVehicleEdit = () => {
+    setVehicleModalMode("list");
+    setVehicleEditId(null);
+    setVehicleDraft(blankVehicle());
+  };
+
+  const selectActiveVehicle = (vid) => {
+    setVehicleId(vid);
+    notify("Active vehicle set");
+  };
+
+  const deleteVehicle = (vid) => {
+    const v = (profile.vehicles || []).find((x) => x.id === vid);
+    const ok = window.confirm(`Delete vehicle: ${formatVehicleLabel(v) || vid}?`);
+    if (!ok) return;
+
+    const nextVehicles = (profile.vehicles || []).filter((x) => x.id !== vid);
+    setProfile((p) => ({ ...p, vehicles: nextVehicles }));
+
+    if (vehicleId === vid) setVehicleId(nextVehicles[0]?.id || "");
+    notify("Vehicle deleted");
+  };
+
+  const saveVehicle = () => {
+    const plate = String(vehicleDraft.plate || "").trim().toUpperCase();
+    const make = String(vehicleDraft.make || "").trim();
+    const model = String(vehicleDraft.model || "").trim();
+
+    if (!plate && !make && !model) {
+      alert("Please enter at least a number plate or make/model.");
+      return;
+    }
+
+    const label = [make, model].filter(Boolean).join(" ").trim() || plate || "Vehicle";
+
+    if (vehicleModalMode === "add") {
+      const idBase = normalizeVehicleId(plate || label);
+      const existingIds = (profile.vehicles || []).map((v) => v.id);
+      let id = idBase;
+      if (existingIds.includes(id)) id = `${idBase}-${Math.random().toString(16).slice(2, 6)}`;
+
+      const nextVehicle = {
+        id,
+        label,
+        plate,
+        make,
+        model,
+        fuelType: String(vehicleDraft.fuelType || "").trim(),
+        year: String(vehicleDraft.year || "").trim(),
+        vin: String(vehicleDraft.vin || "").trim(),
+        tuvUntil: String(vehicleDraft.tuvUntil || "").trim(),
+        serviceDue: String(vehicleDraft.serviceDue || "").trim(),
+        notes: String(vehicleDraft.notes || "").trim(),
+      };
+
+      const nextVehicles = [...(profile.vehicles || []), nextVehicle];
+      setProfile((p) => ({ ...p, vehicles: nextVehicles }));
+      if (!vehicleId) setVehicleId(id);
+      setVehicleId(id);
+      notify("Vehicle added");
+      cancelVehicleEdit();
+      return;
+    }
+
+    // edit
+    const editId = vehicleEditId;
+    if (!editId) {
+      alert("Edit failed: missing vehicle id");
+      cancelVehicleEdit();
+      return;
+    }
+
+    const nextVehicles = (profile.vehicles || []).map((v) => {
+      if (v.id !== editId) return v;
+      return {
+        ...v,
+        label,
+        plate,
+        make,
+        model,
+        fuelType: String(vehicleDraft.fuelType || "").trim(),
+        year: String(vehicleDraft.year || "").trim(),
+        vin: String(vehicleDraft.vin || "").trim(),
+        tuvUntil: String(vehicleDraft.tuvUntil || "").trim(),
+        serviceDue: String(vehicleDraft.serviceDue || "").trim(),
+        notes: String(vehicleDraft.notes || "").trim(),
+      };
+    });
+
+    setProfile((p) => ({ ...p, vehicles: nextVehicles }));
+    notify("Vehicle updated");
+    cancelVehicleEdit();
+  };
+
   const moduleManifest = useMemo(
     () => ({
       id: APP_ID,
@@ -904,6 +1225,8 @@ export default function App() {
     }),
     []
   );
+
+  const activeVehicle = useMemo(() => vehicles.find((v) => v.id === vehicleId) || null, [vehicles, vehicleId]);
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-800">
@@ -925,6 +1248,22 @@ export default function App() {
       ) : null}
 
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} appName="Vehicle Check-It" storageKey={KEY} />
+
+      <VehicleProfilesModal
+        open={vehicleModalOpen}
+        onClose={() => setVehicleModalOpen(false)}
+        vehicles={vehicles}
+        activeVehicleId={vehicleId}
+        onSelectActive={selectActiveVehicle}
+        onStartAdd={startAddVehicle}
+        onStartEdit={startEditVehicle}
+        onDelete={deleteVehicle}
+        mode={vehicleModalMode}
+        draft={vehicleDraft}
+        setDraft={setVehicleDraft}
+        onSave={saveVehicle}
+        onCancelEdit={cancelVehicleEdit}
+      />
 
       {/* Preview Modal */}
       {previewOpen ? (
@@ -968,22 +1307,12 @@ export default function App() {
         {/* Header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="text-sm text-neutral-600"></div>
             <div className="text-4xl sm:text-5xl font-black tracking-tight text-neutral-700">
               <span>Vehicle-Check</span>
               <span className="text-[#D5FF00]">It</span>
             </div>
             <div className="text-sm text-neutral-700">Safety inspection list for your vehicle</div>
             <div className="mt-3 h-[2px] w-80 rounded-full bg-gradient-to-r from-[#D5FF00]/0 via-[#D5FF00] to-[#D5FF00]/0" />
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Pill tone="accent">{doneCount} done</Pill>
-              <Pill>{totalItems} total</Pill>
-              {issueCount ? <Pill tone="danger">{issueCount} issues</Pill> : <Pill>0 issues</Pill>}
-              <Pill>
-                Module: {moduleManifest.id}.{moduleManifest.version}
-              </Pill>
-            </div>
           </div>
 
           {/* Normalized top actions + pinned help icon */}
@@ -1009,163 +1338,73 @@ export default function App() {
 
         {/* Main grid */}
         <div className="mt-5 grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Vehicles (add/manage) */}
+          {/* Vehicle profile (discrete) */}
           <div className={card}>
             <div className={cardHead}>
-              <div className="font-semibold text-neutral-800">Vehicles</div>
+              <div className="font-semibold text-neutral-800">Vehicle profile</div>
               <div className="text-xs text-neutral-600 mt-1">
-                Saved in <span className="font-mono">{PROFILE_KEY}</span>
+                Stored in <span className="font-mono">{PROFILE_KEY}</span>
               </div>
             </div>
+
             <div className={`${cardPad} space-y-3`}>
-              <div className="grid grid-cols-1 gap-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="block text-sm">
-                    <div className="text-neutral-700 font-medium">Number plate</div>
-                    <input
-                      className={inputBase}
-                      placeholder="e.g., M-AB 1234"
-                      value={newVehicle.plate}
-                      onChange={(e) => setNewVehicle((v) => ({ ...v, plate: e.target.value }))}
-                    />
-                  </label>
+              <label className="text-sm block">
+                <div className="text-neutral-700 font-medium">Active vehicle</div>
+                <select className={inputBase} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
+                  {vehicles.length === 0 ? (
+                    <option value="">No vehicles yet</option>
+                  ) : (
+                    vehicles.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {formatVehicleLabel(v)}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </label>
 
-                  <label className="block text-sm">
-                    <div className="text-neutral-700 font-medium">Fuel type</div>
-                    <select
-                      className={inputBase}
-                      value={newVehicle.fuelType}
-                      onChange={(e) => setNewVehicle((v) => ({ ...v, fuelType: e.target.value }))}
-                    >
-                      {FUEL_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+              {activeVehicle ? (
+                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
+                  <div className="text-sm font-semibold text-neutral-800 truncate">{formatVehicleLabel(activeVehicle)}</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {activeVehicle.fuelType ? <Pill tone="accent">{activeVehicle.fuelType}</Pill> : null}
+                    {activeVehicle.tuvUntil ? <Pill>TÜV: {activeVehicle.tuvUntil}</Pill> : null}
+                    {activeVehicle.serviceDue ? <Pill>Service: {activeVehicle.serviceDue}</Pill> : null}
+                  </div>
+                  {activeVehicle.notes ? (
+                    <div className="mt-2 text-xs text-neutral-600 whitespace-pre-wrap">{activeVehicle.notes}</div>
+                  ) : null}
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="block text-sm">
-                    <div className="text-neutral-700 font-medium">Make</div>
-                    <input
-                      className={inputBase}
-                      placeholder="e.g., BMW"
-                      value={newVehicle.make}
-                      onChange={(e) => setNewVehicle((v) => ({ ...v, make: e.target.value }))}
-                    />
-                  </label>
-
-                  <label className="block text-sm">
-                    <div className="text-neutral-700 font-medium">Model</div>
-                    <input
-                      className={inputBase}
-                      placeholder="e.g., 530i"
-                      value={newVehicle.model}
-                      onChange={(e) => setNewVehicle((v) => ({ ...v, model: e.target.value }))}
-                    />
-                  </label>
+              ) : (
+                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600">
+                  Add a vehicle profile to start.
                 </div>
+              )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="block text-sm">
-                    <div className="text-neutral-700 font-medium">TÜV valid until</div>
-                    <input
-                      type="date"
-                      className={inputBase}
-                      value={newVehicle.tuvUntil}
-                      onChange={(e) => setNewVehicle((v) => ({ ...v, tuvUntil: e.target.value }))}
-                    />
-                  </label>
-
-                  <label className="block text-sm">
-                    <div className="text-neutral-700 font-medium">Service due</div>
-                    <input
-                      type="date"
-                      className={inputBase}
-                      value={newVehicle.serviceDue}
-                      onChange={(e) => setNewVehicle((v) => ({ ...v, serviceDue: e.target.value }))}
-                    />
-                  </label>
-                </div>
-
-                <div className="grid grid-cols-1 gap-3">
-                  <label className="block text-sm">
-                    <div className="text-neutral-700 font-medium">Year</div>
-                    <input
-                      className={inputBase}
-                      placeholder="e.g., 2023"
-                      value={newVehicle.year}
-                      onChange={(e) => setNewVehicle((v) => ({ ...v, year: e.target.value }))}
-                    />
-                  </label>
-                </div>
-
-                <label className="block text-sm">
-                  <div className="text-neutral-700 font-medium">VIN (optional)</div>
-                  <input
-                    className={inputBase}
-                    placeholder="Vehicle Identification Number"
-                    value={newVehicle.vin}
-                    onChange={(e) => setNewVehicle((v) => ({ ...v, vin: e.target.value }))}
-                  />
-                </label>
-
-                <label className="block text-sm">
-                  <div className="text-neutral-700 font-medium">Notes (optional)</div>
-                  <textarea
-                    className={inputBase + " min-h-[84px]"}
-                    placeholder="Anything useful (tyre size, quirks, fuel card, etc.)"
-                    value={newVehicle.notes}
-                    onChange={(e) => setNewVehicle((v) => ({ ...v, notes: e.target.value }))}
-                  />
-                </label>
-
-                <button
-                  className={btnSecondary}
-                  onClick={addVehicle}
-                  disabled={
-                    !String(newVehicle.plate || "").trim() &&
-                    !String(newVehicle.make || "").trim() &&
-                    !String(newVehicle.model || "").trim()
-                  }
-                >
+              <div className="flex flex-col gap-2">
+                <button className={btnSecondary} onClick={openVehicleManager}>
+                  Manage vehicles
+                </button>
+                <button className={btnSecondary} onClick={startAddVehicle}>
                   Add vehicle
                 </button>
               </div>
 
-              <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
-                <div className="text-sm font-semibold text-neutral-800">Your vehicles</div>
-                {(vehicles || []).length === 0 ? (
-                  <div className="mt-2 text-sm text-neutral-600">No vehicles yet. Add one above.</div>
-                ) : (
-                  <div className="mt-2 space-y-2">
-                    {vehicles.map((v) => (
-                      <div key={v.id} className="rounded-xl bg-white border border-neutral-200 px-3 py-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium text-neutral-800 truncate">{formatVehicleLabel(v)}</div>
-                            <div className="mt-1 flex flex-wrap gap-2">
-                              {v.fuelType ? <Pill tone="accent">{v.fuelType}</Pill> : null}
-                              {v.tuvUntil ? <Pill>TÜV: {v.tuvUntil}</Pill> : null}
-                              {v.serviceDue ? <Pill>Service: {v.serviceDue}</Pill> : null}
-                            </div>
-                            {v.notes ? <div className="mt-2 text-xs text-neutral-600 whitespace-pre-wrap">{v.notes}</div> : null}
-                            <div className="mt-2 text-[11px] text-neutral-500 font-mono truncate">{v.id}</div>
-                          </div>
-                          <button className={btnDanger} onClick={() => deleteVehicle(v.id)}>
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              <div className="text-xs text-neutral-600">
+                Once added, vehicles are saved as a profile and can be edited anytime.
               </div>
 
-              <div className="text-xs text-neutral-600">
-                Tip: use the Vehicle dropdown in “New vehicle check” to select which vehicle this check is for.
+              {/* Status (moved here, under the vehicle profile card) */}
+              <div className="pt-2">
+                <div className="text-xs font-semibold text-neutral-700">Status</div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Pill tone="accent">{doneCount} done</Pill>
+                  <Pill>{totalItems} total</Pill>
+                  {issueCount ? <Pill tone="danger">{issueCount} issues</Pill> : <Pill>0 issues</Pill>}
+                  <Pill>
+                    Module: {moduleManifest.id}.{moduleManifest.version}
+                  </Pill>
+                </div>
               </div>
             </div>
           </div>
@@ -1191,7 +1430,7 @@ export default function App() {
                   <select className={inputBase} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
                     {vehicles.map((v) => (
                       <option key={v.id} value={v.id}>
-                        {v.label || formatVehicleLabel(v)}
+                        {formatVehicleLabel(v)}
                       </option>
                     ))}
                   </select>
@@ -1236,11 +1475,15 @@ export default function App() {
                                 checked={it.done}
                                 onChange={(e) => updateItem(s.id, it.id, { done: e.target.checked })}
                               />
-                              <span className={it.done ? "line-through text-neutral-500" : "text-neutral-800"}>{it.label}</span>
+                              <span className={it.done ? "line-through text-neutral-500" : "text-neutral-800"}>
+                                {it.label}
+                              </span>
                             </label>
 
                             <div className="flex items-center gap-2">
-                              <span className={"text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>{labelFor(it.severity)}</span>
+                              <span className={"text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>
+                                {labelFor(it.severity)}
+                              </span>
                               <select
                                 className="text-sm px-2 py-1 rounded-xl border border-neutral-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300"
                                 value={it.severity}
@@ -1294,7 +1537,7 @@ export default function App() {
           </div>
 
           <div className={cardPad}>
-            {(state.checks || []).length === 0 ? (
+            {(appState.checks || []).length === 0 ? (
               <div className="text-sm text-neutral-600">No saved checks yet.</div>
             ) : (
               <div className="overflow-auto">
@@ -1310,7 +1553,7 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(state.checks || []).map((c) => (
+                    {(appState.checks || []).map((c) => (
                       <tr key={c.id} className="border-b last:border-b-0">
                         <td className="py-2 pr-2 font-medium">{c.date}</td>
                         <td className="py-2 pr-2">{c.vehicleLabel || c.vehicleId}</td>
