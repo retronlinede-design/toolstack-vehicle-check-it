@@ -15,64 +15,24 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
  *   PROFILE_KEY = toolstack.profile.v1
  */
 
-const APP_ID = "vehiclecheckit";
-const APP_VERSION = "v1";
+import {
+  APP_ID,
+  APP_VERSION,
+  TEMPLATE_REV,
+  KEY,
+  PROFILE_KEY,
+  HUB_URL,
+  FUEL_OPTIONS,
+  blankVehicle,
+} from "./app/constants";
 
-const TEMPLATE_REV = 9;
-
-const KEY = `toolstack.${APP_ID}.${APP_VERSION}`;
-const PROFILE_KEY = "toolstack.profile.v1";
-
-const HUB_URL = "https://YOUR-WIX-HUB-URL-HERE";
-
-const FUEL_OPTIONS = [
-  "95 Super",
-  "95 E10",
-  "98 Super Plus",
-  "Diesel",
-  "Hybrid",
-  "Plug-in-Hybrid",
-  "Elektro",
-  "Autogas (LPG)",
-  "Erdgas (CNG)",
-  "Wasserstoff",
-  "Sonstiges",
-];
-
-const blankVehicle = () => ({
-  id: "",
-  label: "",
-  plate: "",
-  make: "",
-  model: "",
-  fuelType: FUEL_OPTIONS[0],
-  year: "",
-  vin: "",
-  tuvUntil: "",
-  serviceDue: "",
-  notes: "",
-});
-
-function safeParse(raw, fallback) {
-  try {
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-const uid = (prefix = "id") => {
-  try {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
-  } catch {
-    // ignore
-  }
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-};
+import {
+  safeParse,
+  isoToday,
+  uid,
+  normalizeVehicleId,
+  formatVehicleLabel,
+} from "./lib/core";
 
 function badgeFor(sev) {
   if (sev === "issue") return "bg-red-100 text-red-800 border-red-200";
@@ -86,27 +46,12 @@ function labelFor(sev) {
   return "OK";
 }
 
-function normalizeVehicleId(seed) {
-  const base = String(seed || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
-  return base || uid("veh");
-}
-
-function formatVehicleLabel(v) {
-  if (!v) return "-";
-  const mm = [v.make, v.model].filter(Boolean).join(" ").trim();
-  const base = mm || v.label || "Vehicle";
-  const plate = String(v.plate || "").trim();
-  return plate ? `${plate} • ${base}` : base;
-}
-
 function isTestsMode() {
   try {
-    return typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tests") === "1";
+    return (
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("tests") === "1"
+    );
   } catch {
     return false;
   }
@@ -125,7 +70,9 @@ function buildCheckSummaryText(check) {
   lines.push(`Date: ${c.date || "-"}`);
   lines.push(`Vehicle: ${c.vehicleLabel || c.vehicleId || "-"}`);
   lines.push(`Odometer: ${c.odometer || "-"}`);
-  lines.push(`Items: ${(c.summary?.doneCount ?? 0)}/${(c.summary?.totalItems ?? 0)}`);
+  lines.push(
+    `Items: ${(c.summary?.doneCount ?? 0)}/${(c.summary?.totalItems ?? 0)}`
+  );
   lines.push(`Issues: ${(c.summary?.issueCount ?? 0)}`);
 
   if (c.generalNotes) {
@@ -148,18 +95,23 @@ function buildCheckSummaryText(check) {
     lines.push("");
     lines.push("Findings:");
     for (const f of findings.slice(0, 80)) lines.push(f);
-    if (findings.length > 80) lines.push(`…and ${findings.length - 80} more`);
+    if (findings.length > 80)
+      lines.push(`…and ${findings.length - 80} more`);
   }
 
   lines.push("");
-  lines.push("Tip: Open this check in the app and use Preview → Print/Save PDF to attach a clean PDF.");
+  lines.push(
+    "Tip: Open this check in the app and use Preview → Print/Save PDF to attach a clean PDF."
+  );
 
   return lines.join("\n");
 }
 
 function buildCheckEmail(check) {
   const c = check || {};
-  const subject = `Vehicle Check — ${c.date || isoToday()} — ${c.vehicleLabel || c.vehicleId || ""}`.trim();
+  const subject = `Vehicle Check — ${c.date || isoToday()} — ${
+    c.vehicleLabel || c.vehicleId || ""
+  }`.trim();
   const body = buildCheckSummaryText(c);
   return { subject, body };
 }
@@ -168,7 +120,11 @@ function copyTextToClipboard(text) {
   const t = String(text ?? "");
   if (!t) return Promise.resolve(false);
 
-  if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+  if (
+    typeof navigator !== "undefined" &&
+    navigator.clipboard &&
+    navigator.clipboard.writeText
+  ) {
     return navigator.clipboard
       .writeText(t)
       .then(() => true)
@@ -195,10 +151,18 @@ function copyTextToClipboard(text) {
 function parseImportPayload(text) {
   const parsed = JSON.parse(String(text || ""));
   if (parsed?.data?.checks && Array.isArray(parsed.data.checks)) {
-    return { kind: "full", profile: parsed?.profile || null, data: parsed.data };
+    return {
+      kind: "full",
+      profile: parsed?.profile || null,
+      data: parsed.data,
+    };
   }
   if (parsed?.check && typeof parsed.check === "object") {
-    return { kind: "check", profile: parsed?.profile || null, check: parsed.check };
+    return {
+      kind: "check",
+      profile: parsed?.profile || null,
+      check: parsed.check,
+    };
   }
   throw new Error("Invalid import file");
 }
@@ -209,56 +173,107 @@ function runSelfTests() {
     results.push({ name, pass: !!cond });
   };
 
-  assert("safeParse returns fallback on invalid JSON", safeParse("{bad}", 123) === 123);
+  assert(
+    "safeParse returns fallback on invalid JSON",
+    safeParse("{bad}", 123) === 123
+  );
   assert("safeParse parses valid JSON", safeParse('{"a":1}', null)?.a === 1);
 
   const id1 = normalizeVehicleId(" M-AB 1234 ");
-  assert("normalizeVehicleId produces non-empty", typeof id1 === "string" && id1.length > 0);
-  assert("normalizeVehicleId strips spaces/symbols", id1.includes(" ") === false);
+  assert(
+    "normalizeVehicleId produces non-empty",
+    typeof id1 === "string" && id1.length > 0
+  );
+  assert(
+    "normalizeVehicleId strips spaces/symbols",
+    id1.includes(" ") === false
+  );
   const id2 = normalizeVehicleId("");
-  assert("normalizeVehicleId falls back when empty", typeof id2 === "string" && id2.length > 0);
+  assert(
+    "normalizeVehicleId falls back when empty",
+    typeof id2 === "string" && id2.length > 0
+  );
 
   assert(
     "formatVehicleLabel uses plate + make/model",
-    formatVehicleLabel({ plate: "M-AB 1", make: "BMW", model: "530i" }).includes("M-AB 1")
+    formatVehicleLabel({ plate: "M-AB 1", make: "BMW", model: "530i" }).includes(
+      "M-AB 1"
+    )
   );
-  assert("formatVehicleLabel falls back to label", formatVehicleLabel({ label: "TestCar" }).includes("TestCar"));
-  assert("formatVehicleLabel handles plate only", formatVehicleLabel({ plate: "M-AB 9" }).includes("M-AB 9"));
+  assert(
+    "formatVehicleLabel falls back to label",
+    formatVehicleLabel({ label: "TestCar" }).includes("TestCar")
+  );
+  assert(
+    "formatVehicleLabel handles plate only",
+    formatVehicleLabel({ plate: "M-AB 9" }).includes("M-AB 9")
+  );
 
   assert("labelFor(issue) is Issue", labelFor("issue") === "Issue");
   assert("badgeFor(note) contains amber", badgeFor("note").includes("amber"));
 
   const bv = blankVehicle();
-  assert("blankVehicle has fuelType", typeof bv.fuelType === "string" && bv.fuelType.length > 0);
+  assert(
+    "blankVehicle has fuelType",
+    typeof bv.fuelType === "string" && bv.fuelType.length > 0
+  );
 
   const dt = defaultTemplate();
-  assert("defaultTemplate has no Post-trip section", !dt.sections.some((s) => s.title === "Post-trip"));
+  assert(
+    "defaultTemplate has no Post-trip section",
+    !dt.sections.some((s) => s.title === "Post-trip")
+  );
 
   const vs = dt.sections.find((s) => s.title === "Vehicle status");
   assert(
     "defaultTemplate Vehicle status includes Oil level",
-    vs?.items?.some((it) => String(it.label || "").toLowerCase().includes("oil level")) === true
+    vs?.items?.some((it) =>
+      String(it.label || "")
+        .toLowerCase()
+        .includes("oil level")
+    ) === true
   );
   assert(
     "defaultTemplate Vehicle status includes Coolant level",
-    vs?.items?.some((it) => String(it.label || "").toLowerCase().includes("coolant")) === true
+    vs?.items?.some((it) =>
+      String(it.label || "").toLowerCase().includes("coolant")
+    ) === true
   );
 
   const interior = dt.sections.find((s) => s.title === "Interior");
-  const interiorLabels = (interior?.items || []).map((it) => String(it.label || "").toLowerCase());
-  assert("defaultTemplate Interior includes cabin damage", interiorLabels.some((l) => l.includes("cabin damage")) === true);
-  assert("defaultTemplate Interior does not include fuel card", interiorLabels.some((l) => l.includes("fuel card")) === false);
-  assert("defaultTemplate Interior does not include toll card", interiorLabels.some((l) => l.includes("toll")) === false);
+  const interiorLabels = (interior?.items || []).map((it) =>
+    String(it.label || "").toLowerCase()
+  );
+  assert(
+    "defaultTemplate Interior includes cabin damage",
+    interiorLabels.some((l) => l.includes("cabin damage")) === true
+  );
+  assert(
+    "defaultTemplate Interior does not include fuel card",
+    interiorLabels.some((l) => l.includes("fuel card")) === false
+  );
+  assert(
+    "defaultTemplate Interior does not include toll card",
+    interiorLabels.some((l) => l.includes("toll")) === false
+  );
 
   const safety = dt.sections.find((s) => s.title === "Safety");
-  const safetyLabels = (safety?.items || []).map((it) => String(it.label || "").toLowerCase());
+  const safetyLabels = (safety?.items || []).map((it) =>
+    String(it.label || "").toLowerCase()
+  );
   assert("defaultTemplate has Safety section", !!safety);
   assert(
     "defaultTemplate Safety includes Spare tyre / Puncture Kit",
     safetyLabels.some((l) => l.includes("puncture")) === true
   );
-  assert("defaultTemplate Safety includes Jack & tools", safetyLabels.some((l) => l.includes("jack") && l.includes("tools")) === true);
-  assert("defaultTemplate Safety does not include spare bulb kit", safetyLabels.some((l) => l.includes("bulb")) === false);
+  assert(
+    "defaultTemplate Safety includes Jack & tools",
+    safetyLabels.some((l) => l.includes("jack") && l.includes("tools")) === true
+  );
+  assert(
+    "defaultTemplate Safety does not include spare bulb kit",
+    safetyLabels.some((l) => l.includes("bulb")) === false
+  );
 
   const sample = {
     date: "2026-01-07",
@@ -267,7 +282,10 @@ function runSelfTests() {
     summary: { doneCount: 1, totalItems: 2, issueCount: 1 },
     generalNotes: "Hello",
     sections: [
-      { title: "Exterior", items: [{ label: "Tyres", severity: "issue", note: "Low pressure" }] },
+      {
+        title: "Exterior",
+        items: [{ label: "Tyres", severity: "issue", note: "Low pressure" }],
+      },
       { title: "Interior", items: [{ label: "Cabin", severity: "ok", note: "" }] },
     ],
   };
@@ -457,10 +475,10 @@ function Pill({ children, tone = "default" }) {
     tone === "accent"
       ? "border-[#D5FF00]/40 bg-[#D5FF00]/10 text-neutral-800"
       : tone === "warn"
-        ? "border-amber-200 bg-amber-50 text-neutral-800"
-        : tone === "danger"
-          ? "border-red-200 bg-red-50 text-neutral-800"
-          : "border-neutral-200 bg-white text-neutral-800";
+      ? "border-amber-200 bg-amber-50 text-neutral-800"
+      : tone === "danger"
+      ? "border-red-200 bg-red-50 text-neutral-800"
+      : "border-neutral-200 bg-white text-neutral-800";
 
   return (
     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${cls}`}>
@@ -479,8 +497,8 @@ function ActionButton({ children, onClick, tone = "default", disabled, title }) 
     tone === "primary"
       ? "bg-neutral-700 hover:bg-[#D5FF00] hover:border-[#D5FF00] hover:text-neutral-900 text-white border-neutral-700"
       : tone === "danger"
-        ? "bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
-        : "bg-white hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] text-neutral-700 border-neutral-200";
+      ? "bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+      : "bg-white hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] text-neutral-700 border-neutral-200";
 
   return (
     <button type="button" onClick={onClick} disabled={disabled} title={title} className={`${ACTION_BASE} ${cls}`}>
@@ -641,7 +659,8 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
 
             <Section title="Storage key (for troubleshooting)">
               <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
-                <span className="font-medium">localStorage key:</span> <span className="font-mono">{storageKey}</span>
+                <span className="font-medium">localStorage key:</span>{" "}
+                <span className="font-mono">{storageKey}</span>
               </div>
               <div className="mt-2 text-xs text-neutral-500">
                 Shared profile key: <span className="font-mono">{PROFILE_KEY}</span>
@@ -686,7 +705,10 @@ function VehicleProfilesModal({
   if (!open) return null;
 
   const isEditing = mode === "add" || mode === "edit";
-  const requiredOk = String(draft.plate || "").trim() || String(draft.make || "").trim() || String(draft.model || "").trim();
+  const requiredOk =
+    String(draft.plate || "").trim() ||
+    String(draft.make || "").trim() ||
+    String(draft.model || "").trim();
 
   const Field = ({ label, children }) => (
     <label className="block text-sm">
@@ -774,8 +796,7 @@ function VehicleProfilesModal({
                   <div className="text-sm font-semibold text-neutral-800">How it works</div>
                   <div className="mt-2 text-sm text-neutral-700 space-y-2">
                     <p>
-                      Vehicle profiles are saved in your browser on this device. You can edit them anytime, and pick the <b>Active vehicle</b>
-                      for the next checks.
+                      Vehicle profiles are saved in your browser on this device. You can edit them anytime, and pick the <b>Active vehicle</b> for the next checks.
                     </p>
                     <p>Tip: keep plate + make/model filled so the labels stay clean in your history and reports.</p>
                   </div>
@@ -797,7 +818,11 @@ function VehicleProfilesModal({
                     </Field>
 
                     <Field label="Fuel type">
-                      <select className={inputBase} value={draft.fuelType} onChange={(e) => setDraft((d) => ({ ...d, fuelType: e.target.value }))}>
+                      <select
+                        className={inputBase}
+                        value={draft.fuelType}
+                        onChange={(e) => setDraft((d) => ({ ...d, fuelType: e.target.value }))}
+                      >
                         {FUEL_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>
                             {opt}
@@ -1086,7 +1111,10 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicles]);
 
-  const vehicleLabel = useMemo(() => formatVehicleLabel(vehicles.find((v) => v.id === vehicleId) || null), [vehicles, vehicleId]);
+  const vehicleLabel = useMemo(
+    () => formatVehicleLabel(vehicles.find((v) => v.id === vehicleId) || null),
+    [vehicles, vehicleId]
+  );
 
   const [draft, setDraft] = useState(() => {
     const t = appState.template;
@@ -1821,7 +1849,9 @@ export default function App() {
                           <span
                             className={
                               "text-xs px-2 py-1 rounded-full border " +
-                              (c.summary?.issueCount ? "bg-red-100 text-red-800 border-red-200" : "bg-emerald-100 text-emerald-800 border-emerald-200")
+                              (c.summary?.issueCount
+                                ? "bg-red-100 text-red-800 border-red-200"
+                                : "bg-emerald-100 text-emerald-800 border-emerald-200")
                             }
                           >
                             {c.summary?.issueCount || 0}
