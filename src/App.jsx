@@ -579,9 +579,9 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
-      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-        <div className="w-full max-w-2xl rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden">
-          <div className="p-4 border-b border-neutral-100 flex items-start justify-between gap-4">
+      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
+        <div className="w-full max-w-2xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden pointer-events-auto">
+          <div className="p-4 border-b border-neutral-100 flex items-start justify-between gap-4 shrink-0">
             <div>
               <div className="text-sm text-neutral-500">ToolStack • Help Pack v1</div>
               <h2 className="text-lg font-semibold text-neutral-900">{appName} — how your data works</h2>
@@ -597,7 +597,7 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
             </button>
           </div>
 
-          <div className="p-4 space-y-5 max-h-[70vh] overflow-auto">
+          <div className="p-4 space-y-5 overflow-y-auto min-h-0">
             <Section title="Quick start (daily use)">
               <ul className="space-y-1">
                 <Bullet>Use the app normally — it autosaves as you type.</Bullet>
@@ -672,7 +672,7 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
             </Section>
           </div>
 
-          <div className="p-4 border-t border-neutral-100 flex items-center justify-end gap-2">
+          <div className="p-4 border-t border-neutral-100 flex items-center justify-end gap-2 shrink-0">
             <button
               type="button"
               className="print:hidden px-3 py-2 rounded-xl text-sm font-medium border border-neutral-700 bg-neutral-700 text-white hover:bg-[#D5FF00] hover:border-[#D5FF00] hover:text-neutral-900 transition focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300"
@@ -728,9 +728,9 @@ function VehicleProfilesModal({
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
-      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-        <div className="w-full max-w-5xl rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden">
-          <div className="p-4 border-b border-neutral-100 flex items-start justify-between gap-4">
+      <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
+        <div className="w-full max-w-5xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden pointer-events-auto">
+          <div className="p-4 border-b border-neutral-100 flex items-start justify-between gap-4 shrink-0">
             <div>
               <div className="text-sm text-neutral-500">Vehicle profiles • stored locally</div>
               <h2 className="text-lg font-semibold text-neutral-900">Manage vehicles</h2>
@@ -756,7 +756,7 @@ function VehicleProfilesModal({
             </div>
           </div>
 
-          <div className="p-4 max-h-[75vh] overflow-auto">
+          <div className="p-4 overflow-y-auto min-h-0">
             {!isEditing ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-neutral-200 bg-white p-4">
@@ -1564,11 +1564,11 @@ export default function App() {
       />
 
       {previewOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
           <div className="absolute inset-0 bg-black/40" onClick={() => setPreviewOpen(false)} />
 
-          <div className="relative w-full max-w-5xl">
-            <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex items-center justify-between gap-3">
+          <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
+            <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex items-center justify-between gap-3 shrink-0">
               <div className="text-lg font-semibold text-neutral-800">Print preview</div>
               <div className="flex items-center gap-2">
                 <button className={btnSecondary} onClick={() => window.print()}>
@@ -1580,7 +1580,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-neutral-200 shadow-xl overflow-auto max-h-[80vh]">
+            <div className="rounded-2xl bg-white border border-neutral-200 shadow-xl overflow-auto min-h-0">
               <div id="vc-print-preview" className="p-6">
                 <ReportSheet
                   profile={profile}
@@ -1599,11 +1599,11 @@ export default function App() {
       ) : null}
 
       {savedOpen && selectedSavedCheck ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
           <div className="absolute inset-0 bg-black/40" onClick={() => setSavedOpen(false)} />
 
-          <div className="relative w-full max-w-5xl">
-            <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
+            <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
               <div>
                 <div className="text-lg font-semibold text-neutral-800">Saved check</div>
                 <div className="text-sm text-neutral-600">
@@ -1626,13 +1626,16 @@ export default function App() {
                 <button className={btnSecondary} onClick={() => window.print()}>
                   Print / Save PDF
                 </button>
+                <button className={btnDanger} onClick={() => deleteCheck(selectedSavedCheck.id)}>
+                  Delete
+                </button>
                 <button className={btnSecondary} onClick={() => setSavedOpen(false)}>
                   Close
                 </button>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-neutral-200 shadow-xl overflow-auto max-h-[80vh]">
+            <div className="rounded-2xl bg-white border border-neutral-200 shadow-xl overflow-auto min-h-0">
               <div id="vc-print-saved" className="p-6">
                 <ReportSheet
                   profile={profile}
@@ -1885,21 +1888,6 @@ export default function App() {
                           <div className="flex flex-wrap items-center justify-end gap-2">
                             <button className={btnMini} onClick={() => openSaved(c.id)}>
                               View
-                            </button>
-                            <button className={btnMini} onClick={() => exportSingleCheck(c)}>
-                              Export
-                            </button>
-                            <button className={btnMini} onClick={() => downloadSingleCheckTxt(c)}>
-                              TXT
-                            </button>
-                            <button className={btnMini} onClick={() => copySingleCheck(c)}>
-                              Copy
-                            </button>
-                            <button className={btnMini} onClick={() => sendSingleCheck(c)}>
-                              Send
-                            </button>
-                            <button className={btnMiniDanger} onClick={() => deleteCheck(c.id)}>
-                              Delete
                             </button>
                           </div>
                         </td>
