@@ -730,7 +730,7 @@ function VehicleProfilesModal({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
         <div className="w-full max-w-5xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden pointer-events-auto">
-          <div className="p-4 border-b border-neutral-100 flex items-start justify-between gap-4 shrink-0">
+          <div className="p-4 border-b border-neutral-100 flex flex-wrap items-start justify-between gap-4 shrink-0">
             <div>
               <div className="text-sm text-neutral-500">Vehicle profiles • stored locally</div>
               <h2 className="text-lg font-semibold text-neutral-900">Manage vehicles</h2>
