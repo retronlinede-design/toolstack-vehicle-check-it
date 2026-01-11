@@ -687,6 +687,13 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
   );
 }
 
+const Field = ({ label, children }) => (
+  <label className="block text-sm">
+    <div className="text-neutral-700 font-medium">{label}</div>
+    {children}
+  </label>
+);
+
 function VehicleProfilesModal({
   open,
   onClose,
@@ -702,20 +709,21 @@ function VehicleProfilesModal({
   onSave,
   onCancelEdit,
 }) {
-  if (!open) return null;
+  // Keep a local copy of the draft inside the modal so parent re-renders
+  // don't reset the controlled inputs while typing.
+  const [localDraft, setLocalDraft] = useState(draft);
+  React.useEffect(() => {
+    if (open) setLocalDraft(draft);
+    // reset local draft when modal opens or when draft prop changes
+  }, [open, mode, draft]);
 
   const isEditing = mode === "add" || mode === "edit";
   const requiredOk =
-    String(draft.plate || "").trim() ||
-    String(draft.make || "").trim() ||
-    String(draft.model || "").trim();
+    String(localDraft?.plate || "").trim() ||
+    String(localDraft?.make || "").trim() ||
+    String(localDraft?.model || "").trim();
 
-  const Field = ({ label, children }) => (
-    <label className="block text-sm">
-      <div className="text-neutral-700 font-medium">{label}</div>
-      {children}
-    </label>
-  );
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50">
@@ -802,26 +810,26 @@ function VehicleProfilesModal({
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="max-w-3xl">
-                <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-                  <div className="text-sm font-semibold text-neutral-800">{mode === "add" ? "Add vehicle" : "Edit vehicle"}</div>
+            ) : open && localDraft ? (
+                <div className="max-w-3xl">
+                  <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+                    <div className="text-sm font-semibold text-neutral-800">{mode === "add" ? "Add vehicle" : "Edit vehicle"}</div>
 
                   <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Field label="Number plate">
                       <input
                         className={inputBase}
                         placeholder="e.g., M-AB 1234"
-                        value={draft.plate}
-                        onChange={(e) => setDraft((d) => ({ ...d, plate: e.target.value }))}
+                        value={localDraft.plate}
+                        onChange={(e) => setLocalDraft((d) => ({ ...d, plate: e.target.value }))}
                       />
                     </Field>
 
                     <Field label="Fuel type">
                       <select
                         className={inputBase}
-                        value={draft.fuelType}
-                        onChange={(e) => setDraft((d) => ({ ...d, fuelType: e.target.value }))}
+                        value={localDraft.fuelType}
+                        onChange={(e) => setLocalDraft((d) => ({ ...d, fuelType: e.target.value }))}
                       >
                         {FUEL_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>
@@ -832,31 +840,41 @@ function VehicleProfilesModal({
                     </Field>
 
                     <Field label="Make">
-                      <input className={inputBase} placeholder="e.g., BMW" value={draft.make} onChange={(e) => setDraft((d) => ({ ...d, make: e.target.value }))} />
+                      <input
+                        className={inputBase}
+                        placeholder="e.g., BMW"
+                        value={localDraft.make}
+                        onChange={(e) => setLocalDraft((d) => ({ ...d, make: e.target.value }))}
+                      />
                     </Field>
 
                     <Field label="Model">
-                      <input className={inputBase} placeholder="e.g., 530i" value={draft.model} onChange={(e) => setDraft((d) => ({ ...d, model: e.target.value }))} />
+                      <input
+                        className={inputBase}
+                        placeholder="e.g., 530i"
+                        value={localDraft.model}
+                        onChange={(e) => setLocalDraft((d) => ({ ...d, model: e.target.value }))}
+                      />
                     </Field>
 
                     <Field label="TÜV valid until">
-                      <input type="date" className={inputBase} value={draft.tuvUntil} onChange={(e) => setDraft((d) => ({ ...d, tuvUntil: e.target.value }))} />
+                      <input type="date" className={inputBase} value={localDraft.tuvUntil} onChange={(e) => setLocalDraft((d) => ({ ...d, tuvUntil: e.target.value }))} />
                     </Field>
 
                     <Field label="Service due">
-                      <input type="date" className={inputBase} value={draft.serviceDue} onChange={(e) => setDraft((d) => ({ ...d, serviceDue: e.target.value }))} />
+                      <input type="date" className={inputBase} value={localDraft.serviceDue} onChange={(e) => setLocalDraft((d) => ({ ...d, serviceDue: e.target.value }))} />
                     </Field>
 
                     <Field label="Year">
-                      <input className={inputBase} placeholder="e.g., 2023" value={draft.year} onChange={(e) => setDraft((d) => ({ ...d, year: e.target.value }))} />
+                      <input className={inputBase} placeholder="e.g., 2023" value={localDraft.year} onChange={(e) => setLocalDraft((d) => ({ ...d, year: e.target.value }))} />
                     </Field>
 
                     <Field label="VIN (optional)">
                       <input
                         className={inputBase}
                         placeholder="Vehicle Identification Number"
-                        value={draft.vin}
-                        onChange={(e) => setDraft((d) => ({ ...d, vin: e.target.value }))}
+                        value={localDraft.vin}
+                        onChange={(e) => setLocalDraft((d) => ({ ...d, vin: e.target.value }))}
                       />
                     </Field>
                   </div>
@@ -865,8 +883,8 @@ function VehicleProfilesModal({
                     <textarea
                       className={inputBase + " min-h-[100px]"}
                       placeholder="Anything useful (tyre size, quirks, etc.)"
-                      value={draft.notes}
-                      onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))}
+                      value={localDraft.notes}
+                      onChange={(e) => setLocalDraft((d) => ({ ...d, notes: e.target.value }))}
                     />
                   </Field>
 
@@ -874,7 +892,7 @@ function VehicleProfilesModal({
                     <button className={btnSecondary} onClick={onCancelEdit}>
                       Cancel
                     </button>
-                    <button className={btnSecondary} disabled={!requiredOk} onClick={onSave}>
+                    <button className={btnSecondary} disabled={!requiredOk} onClick={() => onSave(localDraft)}>
                       Save
                     </button>
                   </div>
@@ -882,7 +900,7 @@ function VehicleProfilesModal({
                   {!requiredOk ? <div className="mt-3 text-xs text-neutral-600">Please enter at least a number plate or make/model.</div> : null}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -937,11 +955,11 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, draf
             <div className="mt-2 space-y-2">
               {(s.items || []).map((it) => (
                 <div key={it.id} className="text-sm flex items-start justify-between gap-3 border-t pt-2 first:border-t-0 first:pt-0">
-                  <div>
+                  <div className="min-w-0">
                     <div className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</div>
-                    {it.note ? <div className="text-neutral-600 whitespace-pre-wrap">{it.note}</div> : null}
+                    {it.note ? <div className="text-neutral-600 whitespace-pre-wrap break-words">{it.note}</div> : null}
                   </div>
-                  <span className={"text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>{labelFor(it.severity)}</span>
+                  <span className={"shrink-0 text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>{labelFor(it.severity)}</span>
                 </div>
               ))}
             </div>
@@ -1071,7 +1089,7 @@ export default function App() {
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [vehicleModalMode, setVehicleModalMode] = useState("list");
   const [vehicleEditId, setVehicleEditId] = useState(null);
-  const [vehicleDraft, setVehicleDraft] = useState(blankVehicle());
+  const [vehicleDraft, setVehicleDraft] = useState(null);
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
@@ -1079,6 +1097,8 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
 
   const [toast, setToast] = useState(null);
+  const vehicles = useMemo(() => profile.vehicles || [], [profile.vehicles]);
+
   const toastTimer = useRef(null);
   const notify = (msg) => {
     setToast(msg);
@@ -1101,8 +1121,6 @@ export default function App() {
       // ignore
     }
   }, [appState]);
-
-  const vehicles = useMemo(() => profile.vehicles || [], [profile.vehicles]);
 
   useEffect(() => {
     if (!vehicles.length) return;
@@ -1364,7 +1382,7 @@ export default function App() {
     setVehicleModalOpen(true);
     setVehicleModalMode("list");
     setVehicleEditId(null);
-    setVehicleDraft(blankVehicle());
+    setVehicleDraft(null);
   };
 
   const startAddVehicle = () => {
@@ -1396,7 +1414,7 @@ export default function App() {
   const cancelVehicleEdit = () => {
     setVehicleModalMode("list");
     setVehicleEditId(null);
-    setVehicleDraft(blankVehicle());
+    setVehicleDraft(null);
   };
 
   const selectActiveVehicle = (vid) => {
@@ -1416,10 +1434,11 @@ export default function App() {
     notify("Vehicle deleted");
   };
 
-  const saveVehicle = () => {
-    const plate = String(vehicleDraft.plate || "").trim().toUpperCase();
-    const make = String(vehicleDraft.make || "").trim();
-    const model = String(vehicleDraft.model || "").trim();
+  const saveVehicle = (incomingDraft) => {
+    const d = incomingDraft || vehicleDraft;
+    const plate = String(d.plate || "").trim().toUpperCase();
+    const make = String(d.make || "").trim();
+    const model = String(d.model || "").trim();
 
     if (!plate && !make && !model) {
       alert("Please enter at least a number plate or make/model.");
@@ -1440,12 +1459,12 @@ export default function App() {
         plate,
         make,
         model,
-        fuelType: String(vehicleDraft.fuelType || "").trim(),
-        year: String(vehicleDraft.year || "").trim(),
-        vin: String(vehicleDraft.vin || "").trim(),
-        tuvUntil: String(vehicleDraft.tuvUntil || "").trim(),
-        serviceDue: String(vehicleDraft.serviceDue || "").trim(),
-        notes: String(vehicleDraft.notes || "").trim(),
+        fuelType: String(d.fuelType || "").trim(),
+        year: String(d.year || "").trim(),
+        vin: String(d.vin || "").trim(),
+        tuvUntil: String(d.tuvUntil || "").trim(),
+        serviceDue: String(d.serviceDue || "").trim(),
+        notes: String(d.notes || "").trim(),
       };
 
       const nextVehicles = [...(profile.vehicles || []), nextVehicle];
@@ -1471,12 +1490,12 @@ export default function App() {
         plate,
         make,
         model,
-        fuelType: String(vehicleDraft.fuelType || "").trim(),
-        year: String(vehicleDraft.year || "").trim(),
-        vin: String(vehicleDraft.vin || "").trim(),
-        tuvUntil: String(vehicleDraft.tuvUntil || "").trim(),
-        serviceDue: String(vehicleDraft.serviceDue || "").trim(),
-        notes: String(vehicleDraft.notes || "").trim(),
+        fuelType: String(d.fuelType || "").trim(),
+        year: String(d.year || "").trim(),
+        vin: String(d.vin || "").trim(),
+        tuvUntil: String(d.tuvUntil || "").trim(),
+        serviceDue: String(d.serviceDue || "").trim(),
+        notes: String(d.notes || "").trim(),
       };
     });
 
@@ -1650,7 +1669,7 @@ export default function App() {
             <div className="mt-3 h-[2px] w-80 rounded-full bg-gradient-to-r from-[#D5FF00]/0 via-[#D5FF00] to-[#D5FF00]/0" />
           </div>
 
-          <div className="w-full sm:w-[640px]">
+          <div className="w-full sm:w-[820px]">
             <div className="relative">
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 pr-12">
                 <ActionButton onClick={openHub} title="Return to ToolStack hub">
@@ -1671,6 +1690,8 @@ export default function App() {
             </div>
           </div>
         </div>
+
+
 
         <div className="mt-5 grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className={card}>
