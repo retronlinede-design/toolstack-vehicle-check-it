@@ -578,9 +578,9 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
-        <div className="w-full max-w-2xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden pointer-events-auto">
+        <div className="w-full max-w-2xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-2xl overflow-hidden pointer-events-auto">
           <div className="p-4 border-b border-neutral-100 flex items-start justify-between gap-4 shrink-0">
             <div>
               <div className="text-sm text-neutral-500">ToolStack • Help Pack v1</div>
@@ -727,9 +727,9 @@ function VehicleProfilesModal({
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
-        <div className="w-full max-w-5xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden pointer-events-auto">
+        <div className="w-full max-w-5xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-2xl overflow-hidden pointer-events-auto">
           <div className="p-4 border-b border-neutral-100 flex flex-wrap items-start justify-between gap-4 shrink-0">
             <div>
               <div className="text-sm text-neutral-500">Vehicle profiles • stored locally</div>
@@ -911,7 +911,7 @@ function VehicleProfilesModal({
 function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, draft, totals, storageKey }) {
   const sections = draft?.sections || [];
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl print:max-w-none print:w-full">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-2xl font-semibold text-neutral-900">{profile.org || "ToolStack"}</div>
@@ -921,7 +921,7 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, draf
         <div className="text-sm text-neutral-600">Generated: {new Date().toLocaleString()}</div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 print:grid-cols-3">
         <div className="rounded-2xl border border-neutral-200 p-4">
           <div className="text-sm text-neutral-600">Prepared by</div>
           <div className="text-lg font-semibold text-neutral-900 mt-1">{profile.user || "—"}</div>
@@ -948,9 +948,9 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, draf
         </div>
       ) : null}
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 print:grid-cols-2">
         {sections.map((s) => (
-          <div key={s.id} className="rounded-2xl border border-neutral-200 p-3">
+          <div key={s.id} className="rounded-2xl border border-neutral-200 p-3 print:break-inside-avoid">
             <div className="font-semibold">{s.title}</div>
             <div className="mt-2 space-y-2">
               {(s.items || []).map((it) => (
@@ -1531,11 +1531,58 @@ export default function App() {
           body { background: white !important; }
           .print\\:hidden { display: none !important; }
         }
+
+        /* Modern date input styling */
+        input[type="date"] {
+          appearance: none;
+          -webkit-appearance: none;
+          min-height: 42px;
+          color-scheme: light;
+          accent-color: #D5FF00;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          opacity: 0.5;
+          opacity: 0.6;
+          cursor: pointer;
+          transition: all 0.2s;
+          padding: 5px;
+          border-radius: 6px;
+          padding: 8px;
+          margin-right: -4px;
+          border-radius: 8px;
+          background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23525252" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+          background-position: center;
+          background-size: 18px;
+          background-repeat: no-repeat;
+          color: transparent;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+          opacity: 1;
+          background: rgba(0,0,0,0.05);
+        }
       `}</style>
 
       {previewOpen || savedOpen ? (
         <style>{`
           @media print {
+            body * { visibility: hidden; }
+            #vc-print-preview, #vc-print-preview * { visibility: visible; }
+            #vc-print-saved, #vc-print-saved * { visibility: visible; }
+            
+            #vc-print-preview, #vc-print-saved {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              margin: 0;
+              padding: 0;
+            }
+
+            /* Reset modal positioning constraints for print */
+            .fixed, .absolute, .relative {
+              position: static !important;
+              overflow: visible !important;
+            }
             body * { visibility: hidden !important; }
             #vc-print-preview, #vc-print-preview * { visibility: visible !important; }
             #vc-print-saved, #vc-print-saved * { visibility: visible !important; }
@@ -1565,7 +1612,7 @@ export default function App() {
 
       {previewOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setPreviewOpen(false)} />
+          <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={() => setPreviewOpen(false)} />
 
           <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
             <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex items-center justify-between gap-3 shrink-0">
@@ -1580,7 +1627,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-neutral-200 shadow-xl overflow-auto min-h-0">
+            <div className="rounded-2xl bg-white border border-neutral-200 shadow-2xl overflow-auto min-h-0">
               <div id="vc-print-preview" className="p-6">
                 <ReportSheet
                   profile={profile}
@@ -1600,7 +1647,7 @@ export default function App() {
 
       {savedOpen && selectedSavedCheck ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setSavedOpen(false)} />
+          <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={() => setSavedOpen(false)} />
 
           <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
             <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
@@ -1635,7 +1682,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-neutral-200 shadow-xl overflow-auto min-h-0">
+            <div className="rounded-2xl bg-white border border-neutral-200 shadow-2xl overflow-auto min-h-0">
               <div id="vc-print-saved" className="p-6">
                 <ReportSheet
                   profile={profile}
