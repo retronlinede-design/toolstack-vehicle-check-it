@@ -36,16 +36,192 @@ import {
 
 import vehicleCheckItHeading from "./assets/vehiclecheckit-heading.png";
 
+const T = {
+  EN: {
+    vehicleCheckReport: "Vehicle Check Report",
+    date: "Date",
+    vehicle: "Vehicle",
+    odometer: "Odometer",
+    items: "Items",
+    issues: "Issues",
+    serviceAlerts: "Service / Dashboard Alerts",
+    generalNotes: "General notes",
+    findings: "Findings",
+    tipPDF: "Tip: Open this check in the app and use Preview → Print/Save PDF to attach a clean PDF.",
+    manageVehicles: "Manage vehicles",
+    storedIn: "Stored in",
+    addVehicle: "Add vehicle",
+    back: "Back",
+    close: "Close",
+    yourVehicles: "Your vehicles",
+    noVehiclesAdd: "No vehicles yet. Click “Add vehicle”.",
+    setActive: "Set active",
+    active: "Active",
+    edit: "Edit",
+    delete: "Delete",
+    howItWorks: "How it works",
+    profilesInfo: "Vehicle profiles are saved in your browser on this device. You can edit them anytime, and pick the Active vehicle for the next checks.",
+    tipLabels: "Tip: keep plate + make/model filled so the labels stay clean in your history and reports.",
+    editVehicle: "Edit vehicle",
+    plate: "Number plate",
+    fuelType: "Fuel type",
+    make: "Make",
+    model: "Model",
+    tuvUntil: "TÜV valid until",
+    serviceDue: "Service due",
+    year: "Year",
+    vin: "VIN (optional)",
+    notesOpt: "Notes (optional)",
+    cancel: "Cancel",
+    save: "Save",
+    enterPlateOrModel: "Please enter at least a number plate or make/model.",
+    generated: "Generated",
+    preparedBy: "Prepared by",
+    summary: "Summary",
+    done: "Done",
+    signature: "Signature",
+    approvedBy: "Approved by",
+    storageKey: "Storage key",
+    dataSync: "DATA / SYNC",
+    systemData: "System Data",
+    exportBackup: "Export Backup",
+    importData: "Import Data",
+    upload: "UPLOAD",
+    secureStorage: "Secure local storage. Export regularly to prevent data loss.",
+    vehicleProfile: "Vehicle profile",
+    activeVehicle: "Active vehicle",
+    noVehiclesYet: "No vehicles yet",
+    status: "Status",
+    total: "total",
+    module: "Module",
+    newCheck: "New vehicle check",
+    reset: "Reset",
+    preview: "Preview",
+    saveCheck: "Save check",
+    savedChecks: "Saved checks",
+    historyInfo: "Your history (stored locally on this device).",
+    noSavedChecks: "No saved checks yet.",
+    actions: "Actions",
+    view: "View",
+    returnHub: "Return to ToolStack hub",
+    printPreview: "PRINT PREVIEW",
+    printSavePdf: "Print / Save PDF",
+    savedCheck: "Saved check",
+    export: "Export",
+    copy: "Copy",
+    send: "Send",
+    tuvExpiry: "TÜV Expiry",
+    helpGuide: "Guide",
+    quickStart: "Quick Start",
+    dataPrivacy: "Data Privacy",
+    backupRestore: "Backup & Restore",
+    interfaceGlossary: "Interface Glossary",
+    dataSafety: "Data Safety",
+    systemInfo: "System Info",
+    closeGuide: "Close Guide",
+    ok: "OK",
+    note: "Note",
+    issue: "Issue"
+  },
+  DE: {
+    vehicleCheckReport: "Fahrzeugprüfbericht",
+    date: "Datum",
+    vehicle: "Fahrzeug",
+    odometer: "Kilometerstand",
+    items: "Positionen",
+    issues: "Mängel",
+    serviceAlerts: "Service / Dashboard-Warnungen",
+    generalNotes: "Allgemeine Hinweise",
+    findings: "Feststellungen",
+    tipPDF: "Tipp: Öffnen Sie diese Prüfung in der App und nutzen Sie Vorschau → Drucken/PDF speichern.",
+    manageVehicles: "Fahrzeuge verwalten",
+    storedIn: "Gespeichert in",
+    addVehicle: "Fahrzeug hinzufügen",
+    back: "Zurück",
+    close: "Schließen",
+    yourVehicles: "Ihre Fahrzeuge",
+    noVehiclesAdd: "Noch keine Fahrzeuge. Klicken Sie auf „Fahrzeug hinzufügen“.",
+    setActive: "Aktiv setzen",
+    active: "Aktiv",
+    edit: "Bearbeiten",
+    delete: "Löschen",
+    howItWorks: "Wie es funktioniert",
+    profilesInfo: "Fahrzeugprofile werden in Ihrem Browser auf diesem Gerät gespeichert. Sie können sie jederzeit bearbeiten und das aktive Fahrzeug für die nächsten Prüfungen auswählen.",
+    tipLabels: "Tipp: Kennzeichen + Marke/Modell ausfüllen, damit die Bezeichnungen in Verlauf und Berichten sauber bleiben.",
+    editVehicle: "Fahrzeug bearbeiten",
+    plate: "Kennzeichen",
+    fuelType: "Kraftstoffart",
+    make: "Marke",
+    model: "Modell",
+    tuvUntil: "TÜV gültig bis",
+    serviceDue: "Service fällig",
+    year: "Baujahr",
+    vin: "FIN (optional)",
+    notesOpt: "Notizen (optional)",
+    cancel: "Abbrechen",
+    save: "Speichern",
+    enterPlateOrModel: "Bitte geben Sie mindestens ein Kennzeichen oder Marke/Modell ein.",
+    generated: "Erstellt",
+    preparedBy: "Erstellt von",
+    summary: "Zusammenfassung",
+    done: "Erledigt",
+    signature: "Unterschrift",
+    approvedBy: "Genehmigt von",
+    storageKey: "Speicherschlüssel",
+    dataSync: "DATEN / SYNC",
+    systemData: "Systemdaten",
+    exportBackup: "Backup exportieren",
+    importData: "Daten importieren",
+    upload: "HOCHLADEN",
+    secureStorage: "Sicherer lokaler Speicher. Exportieren Sie regelmäßig, um Datenverlust zu vermeiden.",
+    vehicleProfile: "Fahrzeugprofil",
+    activeVehicle: "Aktives Fahrzeug",
+    noVehiclesYet: "Noch keine Fahrzeuge",
+    status: "Status",
+    total: "gesamt",
+    module: "Modul",
+    newCheck: "Neue Fahrzeugprüfung",
+    reset: "Zurücksetzen",
+    preview: "Vorschau",
+    saveCheck: "Prüfung speichern",
+    savedChecks: "Gespeicherte Prüfungen",
+    historyInfo: "Ihr Verlauf (lokal auf diesem Gerät gespeichert).",
+    noSavedChecks: "Noch keine gespeicherten Prüfungen.",
+    actions: "Aktionen",
+    view: "Ansehen",
+    returnHub: "Zurück zum ToolStack Hub",
+    printPreview: "DRUCKVORSCHAU",
+    printSavePdf: "Drucken / PDF speichern",
+    savedCheck: "Gespeicherte Prüfung",
+    export: "Exportieren",
+    copy: "Kopieren",
+    send: "Senden",
+    tuvExpiry: "TÜV-Ablauf",
+    helpGuide: "Anleitung",
+    quickStart: "Schnellstart",
+    dataPrivacy: "Datenschutz",
+    backupRestore: "Backup & Wiederherstellung",
+    interfaceGlossary: "Oberflächen-Glossar",
+    dataSafety: "Datensicherheit",
+    systemInfo: "Systeminfo",
+    closeGuide: "Anleitung schließen",
+    ok: "OK",
+    note: "Hinweis",
+    issue: "Mangel"
+  }
+};
+
 function badgeFor(sev) {
   if (sev === "issue") return "bg-red-100 text-red-800 border-red-200";
   if (sev === "note") return "bg-amber-100 text-amber-800 border-amber-200";
   return "bg-emerald-100 text-emerald-800 border-emerald-200";
 }
 
-function labelFor(sev) {
-  if (sev === "issue") return "Issue";
-  if (sev === "note") return "Note";
-  return "OK";
+function labelFor(sev, lang = "EN") {
+  const dict = T[lang] || T.EN;
+  if (sev === "issue") return dict.issue || "Issue";
+  if (sev === "note") return dict.note || "Note";
+  return dict.ok || "OK";
 }
 
 function isTestsMode() {
@@ -63,29 +239,30 @@ function isHubPlaceholder() {
   return !HUB_URL || HUB_URL.includes("YOUR-WIX-HUB-URL-HERE");
 }
 
-function buildCheckSummaryText(check) {
+function buildCheckSummaryText(check, lang = "EN") {
   const c = check || {};
+  const dict = T[lang] || T.EN;
 
   const lines = [];
-  lines.push("Vehicle Check Report");
+  lines.push(dict.vehicleCheckReport);
   lines.push("-------------------");
-  lines.push(`Date: ${c.date || "-"}`);
-  lines.push(`Vehicle: ${c.vehicleLabel || c.vehicleId || "-"}`);
-  lines.push(`Odometer: ${c.odometer || "-"}`);
+  lines.push(`${dict.date}: ${c.date || "-"}`);
+  lines.push(`${dict.vehicle}: ${c.vehicleLabel || c.vehicleId || "-"}`);
+  lines.push(`${dict.odometer}: ${c.odometer || "-"}`);
   lines.push(
-    `Items: ${(c.summary?.doneCount ?? 0)}/${(c.summary?.totalItems ?? 0)}`
+    `${dict.items}: ${(c.summary?.doneCount ?? 0)}/${(c.summary?.totalItems ?? 0)}`
   );
-  lines.push(`Issues: ${(c.summary?.issueCount ?? 0)}`);
+  lines.push(`${dict.issues}: ${(c.summary?.issueCount ?? 0)}`);
 
   if (c.serviceNotes) {
     lines.push("");
-    lines.push("Service / Dashboard Alerts:");
+    lines.push(`${dict.serviceAlerts}:`);
     lines.push(String(c.serviceNotes));
   }
 
   if (c.generalNotes) {
     lines.push("");
-    lines.push("General notes:");
+    lines.push(`${dict.generalNotes}:`);
     lines.push(String(c.generalNotes));
   }
 
@@ -101,26 +278,24 @@ function buildCheckSummaryText(check) {
 
   if (findings.length) {
     lines.push("");
-    lines.push("Findings:");
+    lines.push(`${dict.findings}:`);
     for (const f of findings.slice(0, 80)) lines.push(f);
     if (findings.length > 80)
       lines.push(`…and ${findings.length - 80} more`);
   }
 
   lines.push("");
-  lines.push(
-    "Tip: Open this check in the app and use Preview → Print/Save PDF to attach a clean PDF."
-  );
+  lines.push(dict.tipPDF);
 
   return lines.join("\n");
 }
 
-function buildCheckEmail(check) {
+function buildCheckEmail(check, lang = "EN") {
   const c = check || {};
-  const subject = `Vehicle Check — ${c.date || isoToday()} — ${
+  const subject = `${(T[lang] || T.EN).vehicleCheckReport} — ${c.date || isoToday()} — ${
     c.vehicleLabel || c.vehicleId || ""
   }`.trim();
-  const body = buildCheckSummaryText(c);
+  const body = buildCheckSummaryText(c, lang);
   return { subject, body };
 }
 
@@ -452,24 +627,24 @@ function saveState(state) {
 }
 
 const btnSecondary =
-  "px-3 py-2 rounded-xl bg-white border border-neutral-200 shadow-sm " +
-  "hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] active:translate-y-[1px] transition " +
-  "disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300";
+  "px-4 py-2 rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center " +
+  "bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 " +
+  "disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative";
 
 const btnDanger =
-  "px-3 py-2 rounded-xl bg-red-50 text-red-700 border border-red-200 shadow-sm " +
-  "hover:bg-red-100 active:translate-y-[1px] transition disabled:opacity-50 disabled:cursor-not-allowed " +
-  "focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300";
+  "px-4 py-2 rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center " +
+  "bg-neutral-900 text-red-500 border-neutral-800 hover:bg-neutral-800 hover:border-red-500/50 " +
+  "disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500/50 z-10 relative";
 
 const btnMini =
-  "px-2.5 py-1.5 rounded-xl bg-white border border-neutral-200 shadow-sm text-xs font-medium " +
-  "hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] active:translate-y-[1px] transition " +
-  "disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300";
+  "px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center " +
+  "bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 " +
+  "disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative";
 
 const btnMiniDanger =
-  "px-2.5 py-1.5 rounded-xl bg-red-50 text-red-700 border border-red-200 shadow-sm text-xs font-medium " +
-  "hover:bg-red-100 active:translate-y-[1px] transition disabled:opacity-50 disabled:cursor-not-allowed " +
-  "focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300";
+  "px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center " +
+  "bg-neutral-900 text-red-500 border-neutral-800 hover:bg-neutral-800 hover:border-red-500/50 " +
+  "disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500/50 z-10 relative";
 
 const inputBase =
   "w-full mt-1 px-3 py-2 rounded-xl border border-neutral-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300";
@@ -496,17 +671,15 @@ function Pill({ children, tone = "default" }) {
 }
 
 const ACTION_BASE =
-  "print:hidden h-10 w-full rounded-xl text-sm font-medium border transition shadow-sm active:translate-y-[1px] " +
+  "print:hidden h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] " +
   "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center " +
-  "focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300";
+  "focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative";
 
 function ActionButton({ children, onClick, tone = "default", disabled, title }) {
   const cls =
-    tone === "primary"
-      ? "bg-neutral-700 hover:bg-[#D5FF00] hover:border-[#D5FF00] hover:text-neutral-900 text-white border-neutral-700"
-      : tone === "danger"
-      ? "bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
-      : "bg-white hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] text-neutral-700 border-neutral-200";
+    tone === "danger"
+      ? "bg-neutral-900 text-red-500 border-neutral-800 hover:bg-neutral-800 hover:border-red-500/50"
+      : "bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50";
 
   return (
     <button type="button" onClick={onClick} disabled={disabled} title={title} className={`${ACTION_BASE} ${cls}`}>
@@ -517,9 +690,9 @@ function ActionButton({ children, onClick, tone = "default", disabled, title }) 
 
 function ActionFileButton({ children, onFile, accept = "application/json", tone = "default", title }) {
   const cls =
-    tone === "primary"
-      ? "bg-neutral-700 hover:bg-[#D5FF00] hover:border-[#D5FF00] hover:text-neutral-900 text-white border-neutral-700"
-      : "bg-white hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] text-neutral-700 border-neutral-200";
+    tone === "danger"
+      ? "bg-neutral-900 text-red-500 border-neutral-800 hover:bg-neutral-800 hover:border-red-500/50"
+      : "bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50";
 
   return (
     <label title={title} className={`${ACTION_BASE} ${cls} cursor-pointer`}>
@@ -538,7 +711,7 @@ function ActionFileButton({ children, onFile, accept = "application/json", tone 
   );
 }
 
-function HelpIconButton({ onClick, title = "Help" }) {
+function HelpIconButton({ onClick, title }) {
   return (
     <button
       type="button"
@@ -556,7 +729,7 @@ function HelpIconButton({ onClick, title = "Help" }) {
   );
 }
 
-function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(unknown)", actions = [] }) {
+function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(unknown)", actions = [], t }) {
   if (!open) return null;
 
   const Section = ({ title, children }) => (
@@ -576,10 +749,10 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
   );
 
   const baseActions = [
-    { name: "Preview", desc: "View print-safe report sheet." },
-    { name: "Print / PDF", desc: "Print or save as PDF via browser." },
-    { name: "Export", desc: "Download JSON backup." },
-    { name: "Import", desc: "Restore from JSON backup." },
+    { name: t("preview"), desc: "View print-safe report sheet." },
+    { name: t("printSavePdf"), desc: "Print or save as PDF via browser." },
+    { name: t("export"), desc: "Download JSON backup." },
+    { name: t("importData"), desc: "Restore from JSON backup." },
   ];
 
   const extra = (actions || []).map((a) => ({ name: a, desc: "Extra tool for this app." }));
@@ -592,7 +765,7 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
           <div className="p-5 border-b border-neutral-800 flex items-start justify-between gap-4 shrink-0 bg-neutral-900/50">
             <div>
               <div className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-1">ToolStack • Help Pack v1</div>
-              <h2 className="text-xl font-black text-white tracking-tight">{appName} <span className="text-neutral-600 font-normal">— Guide</span></h2>
+              <h2 className="text-xl font-black text-white tracking-tight">{appName} <span className="text-neutral-600 font-normal">— {t("helpGuide")}</span></h2>
             </div>
 
             <button
@@ -606,7 +779,7 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
 
           <div className="p-6 space-y-8 overflow-y-auto min-h-0 custom-scrollbar">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Section title="Quick Start">
+              <Section title={t("quickStart")}>
                 <ul className="space-y-2">
                   <Bullet>App <b>autosaves</b> as you type.</Bullet>
                   <Bullet>Use <b>Preview</b> to check your report.</Bullet>
@@ -614,36 +787,36 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
                 </ul>
               </Section>
 
-              <Section title="Data Privacy">
+              <Section title={t("dataPrivacy")}>
                 <p>
                   Data lives in your browser's <b>Local Storage</b> on this device.
                 </p>
                 <p className="text-neutral-500 text-xs mt-2">
-                  No cloud upload. No login. Your data stays here unless you export it.
+                  No cloud upload. No login.
                 </p>
               </Section>
             </div>
 
-            <Section title="Backup & Restore">
+            <Section title={t("backupRestore")}>
               <div className="rounded-xl border border-neutral-800 bg-neutral-800/30 p-4 space-y-3">
                 <div className="flex gap-3">
                   <div className="shrink-0 w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[#D5FF00] font-bold text-xs">1</div>
                   <div>
-                    <div className="text-neutral-200 font-bold text-sm">Export Regularly</div>
+                    <div className="text-neutral-200 font-bold text-sm">{t("exportBackup")}</div>
                     <div className="text-neutral-500 text-xs mt-1">Download a JSON backup weekly or after big changes. Save it to a secure location.</div>
                   </div>
                 </div>
                 <div className="flex gap-3">
                   <div className="shrink-0 w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[#D5FF00] font-bold text-xs">2</div>
                   <div>
-                    <div className="text-neutral-200 font-bold text-sm">Import to Restore</div>
+                    <div className="text-neutral-200 font-bold text-sm">{t("importData")}</div>
                     <div className="text-neutral-500 text-xs mt-1">Use Import to load a backup file. This replaces current data on this device.</div>
                   </div>
                 </div>
               </div>
             </Section>
 
-            <Section title="Interface Glossary">
+            <Section title={t("interfaceGlossary")}>
               <div className="rounded-xl border border-neutral-800 bg-neutral-900 px-4">
                 {[...baseActions, ...extra].map((a) => (
                   <ActionRow key={a.name} name={a.name} desc={a.desc} />
@@ -652,10 +825,10 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
             </Section>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Section title="Data Safety">
+              <Section title={t("dataSafety")}>
                 <p className="text-xs text-neutral-500">Avoid clearing browser "Site Data" or using "Private/Incognito" mode if you want to keep data persistent.</p>
               </Section>
-              <Section title="System Info">
+              <Section title={t("systemInfo")}>
                 <div className="text-xs text-neutral-600 font-mono bg-neutral-950 p-2 rounded border border-neutral-800">
                   Key: {storageKey}<br />
                   Profile: {PROFILE_KEY}
@@ -670,7 +843,7 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
               className="print:hidden px-4 py-2 rounded-xl text-sm font-bold tracking-wide border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30"
               onClick={onClose}
             >
-              Close Guide
+              {t("closeGuide")}
             </button>
           </div>
         </div>
@@ -700,6 +873,7 @@ function VehicleProfilesModal({
   setDraft,
   onSave,
   onCancelEdit,
+  t,
 }) {
   // Keep a local copy of the draft inside the modal so parent re-renders
   // don't reset the controlled inputs while typing.
@@ -724,26 +898,26 @@ function VehicleProfilesModal({
         <div className="w-full max-w-5xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-2xl overflow-hidden pointer-events-auto">
           <div className="p-4 border-b border-neutral-100 flex flex-wrap items-start justify-between gap-4 shrink-0">
             <div>
-              <div className="text-sm text-neutral-500">Vehicle profiles • stored locally</div>
-              <h2 className="text-lg font-semibold text-neutral-900">Manage vehicles</h2>
+              <div className="text-sm text-neutral-500">{t("vehicleProfile")} • stored locally</div>
+              <h2 className="text-lg font-semibold text-neutral-900">{t("manageVehicles")}</h2>
               <div className="mt-3 h-[2px] w-56 rounded-full bg-gradient-to-r from-[#D5FF00]/0 via-[#D5FF00] to-[#D5FF00]/0" />
               <div className="mt-2 text-xs text-neutral-500">
-                Stored in <span className="font-mono">{PROFILE_KEY}</span>
+                {t("storedIn")} <span className="font-mono">{PROFILE_KEY}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               {!isEditing ? (
                 <button className={btnSecondary} onClick={onStartAdd}>
-                  Add vehicle
+                  {t("addVehicle")}
                 </button>
               ) : (
                 <button className={btnSecondary} onClick={onCancelEdit}>
-                  Back
+                  {t("back")}
                 </button>
               )}
               <button className={btnSecondary} onClick={onClose}>
-                Close
+                {t("close")}
               </button>
             </div>
           </div>
@@ -752,9 +926,9 @@ function VehicleProfilesModal({
             {!isEditing ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-                  <div className="text-sm font-semibold text-neutral-800">Your vehicles</div>
+                  <div className="text-sm font-semibold text-neutral-800">{t("yourVehicles")}</div>
                   {vehicles.length === 0 ? (
-                    <div className="mt-2 text-sm text-neutral-600">No vehicles yet. Click “Add vehicle”.</div>
+                    <div className="mt-2 text-sm text-neutral-600">{t("noVehiclesAdd")}</div>
                   ) : (
                     <div className="mt-3 space-y-2">
                       {vehicles.map((v) => (
@@ -766,7 +940,7 @@ function VehicleProfilesModal({
                                 {v.fuelType ? <Pill tone="accent">{v.fuelType}</Pill> : null}
                                 {v.tuvUntil ? <Pill>TÜV: {v.tuvUntil}</Pill> : null}
                                 {v.serviceDue ? <Pill>Service: {v.serviceDue}</Pill> : null}
-                                {v.id === activeVehicleId ? <Pill tone="accent">Active</Pill> : null}
+                                {v.id === activeVehicleId ? <Pill tone="accent">{t("active")}</Pill> : null}
                               </div>
                               {v.notes ? <div className="mt-2 text-xs text-neutral-600 whitespace-pre-wrap">{v.notes}</div> : null}
                               <div className="mt-2 text-[11px] text-neutral-500 font-mono truncate">{v.id}</div>
@@ -775,14 +949,14 @@ function VehicleProfilesModal({
                             <div className="shrink-0 flex flex-col gap-2">
                               {v.id !== activeVehicleId ? (
                                 <button className={btnSecondary} onClick={() => onSelectActive(v.id)}>
-                                  Set active
+                                  {t("setActive")}
                                 </button>
                               ) : null}
                               <button className={btnSecondary} onClick={() => onStartEdit(v)}>
-                                Edit
+                                {t("edit")}
                               </button>
                               <button className={btnDanger} onClick={() => onDelete(v.id)}>
-                                Delete
+                                {t("delete")}
                               </button>
                             </div>
                           </div>
@@ -793,22 +967,22 @@ function VehicleProfilesModal({
                 </div>
 
                 <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-                  <div className="text-sm font-semibold text-neutral-800">How it works</div>
+                  <div className="text-sm font-semibold text-neutral-800">{t("howItWorks")}</div>
                   <div className="mt-2 text-sm text-neutral-700 space-y-2">
                     <p>
-                      Vehicle profiles are saved in your browser on this device. You can edit them anytime, and pick the <b>Active vehicle</b> for the next checks.
+                      {t("profilesInfo")}
                     </p>
-                    <p>Tip: keep plate + make/model filled so the labels stay clean in your history and reports.</p>
+                    <p>{t("tipLabels")}</p>
                   </div>
                 </div>
               </div>
             ) : open && localDraft ? (
                 <div className="max-w-3xl">
                   <div className="rounded-2xl border border-neutral-200 bg-white p-4">
-                    <div className="text-sm font-semibold text-neutral-800">{mode === "add" ? "Add vehicle" : "Edit vehicle"}</div>
+                    <div className="text-sm font-semibold text-neutral-800">{mode === "add" ? t("addVehicle") : t("editVehicle")}</div>
 
                   <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Field label="Number plate">
+                    <Field label={t("plate")}>
                       <input
                         className={inputBase}
                         placeholder="e.g., M-AB 1234"
@@ -817,7 +991,7 @@ function VehicleProfilesModal({
                       />
                     </Field>
 
-                    <Field label="Fuel type">
+                    <Field label={t("fuelType")}>
                       <select
                         className={inputBase}
                         value={localDraft.fuelType}
@@ -831,7 +1005,7 @@ function VehicleProfilesModal({
                       </select>
                     </Field>
 
-                    <Field label="Make">
+                    <Field label={t("make")}>
                       <input
                         className={inputBase}
                         placeholder="e.g., BMW"
@@ -840,7 +1014,7 @@ function VehicleProfilesModal({
                       />
                     </Field>
 
-                    <Field label="Model">
+                    <Field label={t("model")}>
                       <input
                         className={inputBase}
                         placeholder="e.g., 530i"
@@ -849,19 +1023,19 @@ function VehicleProfilesModal({
                       />
                     </Field>
 
-                    <Field label="TÜV valid until">
+                    <Field label={t("tuvUntil")}>
                       <input type="date" className={inputBase} value={localDraft.tuvUntil} onChange={(e) => setLocalDraft((d) => ({ ...d, tuvUntil: e.target.value }))} />
                     </Field>
 
-                    <Field label="Service due">
+                    <Field label={t("serviceDue")}>
                       <input type="date" className={inputBase} value={localDraft.serviceDue} onChange={(e) => setLocalDraft((d) => ({ ...d, serviceDue: e.target.value }))} />
                     </Field>
 
-                    <Field label="Year">
+                    <Field label={t("year")}>
                       <input className={inputBase} placeholder="e.g., 2023" value={localDraft.year} onChange={(e) => setLocalDraft((d) => ({ ...d, year: e.target.value }))} />
                     </Field>
 
-                    <Field label="VIN (optional)">
+                    <Field label={t("vin")}>
                       <input
                         className={inputBase}
                         placeholder="Vehicle Identification Number"
@@ -871,7 +1045,7 @@ function VehicleProfilesModal({
                     </Field>
                   </div>
 
-                  <Field label="Notes (optional)">
+                  <Field label={t("notesOpt")}>
                     <textarea
                       className={inputBase + " min-h-[100px]"}
                       placeholder="Anything useful (tyre size, quirks, etc.)"
@@ -882,14 +1056,14 @@ function VehicleProfilesModal({
 
                   <div className="mt-4 flex items-center justify-end gap-2">
                     <button className={btnSecondary} onClick={onCancelEdit}>
-                      Cancel
+                      {t("cancel")}
                     </button>
                     <button className={btnSecondary} disabled={!requiredOk} onClick={() => onSave(localDraft)}>
-                      Save
+                      {t("save")}
                     </button>
                   </div>
 
-                  {!requiredOk ? <div className="mt-3 text-xs text-neutral-600">Please enter at least a number plate or make/model.</div> : null}
+                  {!requiredOk ? <div className="mt-3 text-xs text-neutral-600">{t("enterPlateOrModel")}</div> : null}
                 </div>
               </div>
             ) : null}
@@ -900,49 +1074,49 @@ function VehicleProfilesModal({
   );
 }
 
-function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serviceNotes, draft, totals, storageKey }) {
+function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serviceNotes, draft, totals, storageKey, t }) {
   const sections = draft?.sections || [];
   return (
     <div className="mx-auto max-w-4xl print:max-w-none print:w-full">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="text-2xl font-semibold text-neutral-900">{profile.org || "ToolStack"}</div>
-          <div className="text-sm text-neutral-600">Vehicle Check Report</div>
+          <div className="text-sm text-neutral-600">{t("vehicleCheckReport")}</div>
           <div className="mt-3 h-[2px] w-72 rounded-full bg-gradient-to-r from-[#D5FF00]/0 via-[#D5FF00] to-[#D5FF00]/0" />
         </div>
-        <div className="text-sm text-neutral-600">Generated: {new Date().toLocaleString()}</div>
+        <div className="text-sm text-neutral-600">{t("generated")}: {new Date().toLocaleString()}</div>
       </div>
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 print:grid-cols-3">
         <div className="rounded-2xl border border-neutral-200 p-4">
-          <div className="text-sm text-neutral-600">Prepared by</div>
+          <div className="text-sm text-neutral-600">{t("preparedBy")}</div>
           <div className="text-lg font-semibold text-neutral-900 mt-1">{profile.user || "—"}</div>
         </div>
         <div className="rounded-2xl border border-neutral-200 p-4">
-          <div className="text-sm text-neutral-600">Vehicle</div>
+          <div className="text-sm text-neutral-600">{t("vehicle")}</div>
           <div className="text-sm text-neutral-900 mt-1">{vehicleLabel || "—"}</div>
-          <div className="text-xs text-neutral-600 mt-1">Date: {date || "—"}</div>
+          <div className="text-xs text-neutral-600 mt-1">{t("date")}: {date || "—"}</div>
         </div>
         <div className="rounded-2xl border border-neutral-200 p-4">
-          <div className="text-sm text-neutral-600">Summary</div>
+          <div className="text-sm text-neutral-600">{t("summary")}</div>
           <div className="text-sm text-neutral-900 mt-1">
-            Done: <span className="font-semibold">{totals.doneCount}</span>/{totals.totalItems} • Issues:{" "}
+            {t("done")}: <span className="font-semibold">{totals.doneCount}</span>/{totals.totalItems} • {t("issues")}:{" "}
             <span className="font-semibold">{totals.issueCount}</span>
           </div>
-          <div className="text-xs text-neutral-600 mt-1">Odometer: {odometer || "—"}</div>
+          <div className="text-xs text-neutral-600 mt-1">{t("odometer")}: {odometer || "—"}</div>
         </div>
       </div>
 
       {serviceNotes ? (
         <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm">
-          <div className="font-semibold text-amber-900">Service / Dashboard Alerts</div>
+          <div className="font-semibold text-amber-900">{t("serviceAlerts")}</div>
           <div className="mt-1 text-amber-800 whitespace-pre-wrap">{serviceNotes}</div>
         </div>
       ) : null}
 
       {generalNotes ? (
         <div className="mt-4 rounded-2xl border border-neutral-200 p-4 text-sm">
-          <div className="font-semibold text-neutral-900">General notes</div>
+          <div className="font-semibold text-neutral-900">{t("generalNotes")}</div>
           <div className="mt-1 text-neutral-700 whitespace-pre-wrap">{generalNotes}</div>
         </div>
       ) : null}
@@ -958,7 +1132,7 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serv
                     <div className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</div>
                     {it.note ? <div className="text-neutral-600 whitespace-pre-wrap break-words">{it.note}</div> : null}
                   </div>
-                  <span className={"shrink-0 text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>{labelFor(it.severity)}</span>
+                  <span className={"shrink-0 text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>{labelFor(it.severity, profile.language)}</span>
                 </div>
               ))}
             </div>
@@ -968,17 +1142,17 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serv
 
       <div className="mt-6 grid grid-cols-2 gap-6 text-sm">
         <div>
-          <div className="text-neutral-600">Prepared by</div>
-          <div className="mt-8 border-t pt-2">Signature</div>
+          <div className="text-neutral-600">{t("preparedBy")}</div>
+          <div className="mt-8 border-t pt-2">{t("signature")}</div>
         </div>
         <div>
-          <div className="text-neutral-600">Approved by</div>
-          <div className="mt-8 border-t pt-2">Signature</div>
+          <div className="text-neutral-600">{t("approvedBy")}</div>
+          <div className="mt-8 border-t pt-2">{t("signature")}</div>
         </div>
       </div>
 
       <div className="mt-6 text-xs text-neutral-500">
-        Storage key: <span className="font-mono">{storageKey}</span>
+        {t("storageKey")}: <span className="font-mono">{storageKey}</span>
       </div>
     </div>
   );
@@ -1019,7 +1193,7 @@ function TestsPanel() {
   );
 }
 
-const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem }) {
+const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem, t, lang }) {
   const [localNote, setLocalNote] = useState(item.note || "");
 
   useEffect(() => {
@@ -1049,15 +1223,15 @@ const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem }) {
         </label>
 
         <div className="flex items-center gap-2">
-          <span className={"text-xs px-2 py-1 rounded-full border " + badgeFor(item.severity)}>{labelFor(item.severity)}</span>
+          <span className={"text-xs px-2 py-1 rounded-full border " + badgeFor(item.severity)}>{labelFor(item.severity, lang)}</span>
           <select
             className="text-sm px-2 py-1 rounded-xl border border-neutral-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300"
             value={item.severity}
             onChange={(e) => onSeverityChange(e.target.value)}
           >
-            <option value="ok">OK</option>
-            <option value="note">Note</option>
-            <option value="issue">Issue</option>
+            <option value="ok">{t("ok")}</option>
+            <option value="note">{t("note")}</option>
+            <option value="issue">{t("issue")}</option>
           </select>
         </div>
       </div>
@@ -1075,7 +1249,7 @@ const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem }) {
   );
 });
 
-function DataMenu({ onExport, onImport }) {
+function DataMenu({ onExport, onImport, t }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -1096,13 +1270,13 @@ function DataMenu({ onExport, onImport }) {
         onClick={() => setOpen(!open)}
         className="h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative"
       >
-        DATA / SYNC
+        {t("dataSync")}
       </button>
 
       {open && (
         <div className="absolute right-0 top-12 z-50 w-72 p-2 rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] origin-top-right animate-in fade-in zoom-in-95 duration-100">
           <div className="px-3 py-2 text-[10px] font-black text-neutral-500 uppercase tracking-widest border-b border-neutral-800 mb-1">
-            System Data
+            {t("systemData")}
           </div>
 
           <button
@@ -1112,16 +1286,16 @@ function DataMenu({ onExport, onImport }) {
             }}
             className="w-full text-left px-3 py-3 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
           >
-            <span>Export Backup</span>
+            <span>{t("exportBackup")}</span>
             <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
               JSON
             </span>
           </button>
 
           <label className="w-full text-left px-3 py-3 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between cursor-pointer">
-            <span>Import Data</span>
+            <span>{t("importData")}</span>
             <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
-              UPLOAD
+              {t("upload")}
             </span>
             <input
               type="file"
@@ -1137,7 +1311,7 @@ function DataMenu({ onExport, onImport }) {
           </label>
 
           <div className="mt-2 px-3 py-2 text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-800">
-            Secure local storage. Export regularly to prevent data loss.
+            {t("secureStorage")}
           </div>
         </div>
       )}
@@ -1162,8 +1336,6 @@ function LanguageSelector({ current, onChange }) {
   const langs = [
     { code: "EN", label: "English" },
     { code: "DE", label: "Deutsch" },
-    { code: "FR", label: "Français" },
-    { code: "ES", label: "Español" },
   ];
 
   const active = langs.find((l) => l.code === current) || langs[0];
@@ -1207,6 +1379,9 @@ function LanguageSelector({ current, onChange }) {
 export default function App() {
   const [profile, setProfile] = useState(loadProfile());
   const [appState, setAppState] = useState(loadState());
+
+  const lang = profile.language || "EN";
+  const t = (key) => T[lang]?.[key] || T.EN[key] || key;
 
   const [date, setDate] = useState(isoToday());
   const [vehicleId, setVehicleId] = useState(profile.vehicles?.[0]?.id || "");
@@ -1446,7 +1621,7 @@ export default function App() {
 
   const downloadSingleCheckTxt = (c) => {
     if (!c) return;
-    const text = buildCheckSummaryText(c);
+    const text = buildCheckSummaryText(c, lang);
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -1460,14 +1635,14 @@ export default function App() {
 
   const copySingleCheck = async (c) => {
     if (!c) return;
-    const ok = await copyTextToClipboard(buildCheckSummaryText(c));
+    const ok = await copyTextToClipboard(buildCheckSummaryText(c, lang));
     if (ok) notify("Copied");
     else alert("Copy failed. Try Export or Download TXT.");
   };
 
   const sendSingleCheck = async (c) => {
     if (!c) return;
-    const { subject, body } = buildCheckEmail(c);
+    const { subject, body } = buildCheckEmail(c, lang);
 
     const safeDate = String(c.date || isoToday()).replace(/[^0-9-]/g, "");
     const txtFile = new File([body], `vehicle-check-${safeDate}.txt`, { type: "text/plain" });
@@ -1723,7 +1898,7 @@ export default function App() {
         `}</style>
       ) : null}
 
-      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} appName="Vehicle Check-It" storageKey={KEY} />
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} appName="Vehicle Check-It" storageKey={KEY} t={t} />
 
       <VehicleProfilesModal
         open={vehicleModalOpen}
@@ -1739,6 +1914,7 @@ export default function App() {
         setDraft={setVehicleDraft}
         onSave={saveVehicle}
         onCancelEdit={cancelVehicleEdit}
+        t={t}
       />
 
       {previewOpen ? (
@@ -1747,13 +1923,13 @@ export default function App() {
 
           <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
             <div className="mb-3 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_0_15px_-3px_rgba(213,255,0,0.15)] p-3 flex items-center justify-between gap-3 shrink-0">
-              <div className="text-lg font-bold tracking-wide text-[#D5FF00] pl-2">PRINT PREVIEW</div>
+              <div className="text-lg font-bold tracking-wide text-[#D5FF00] pl-2">{t("printPreview")}</div>
               <div className="flex items-center gap-2">
-                <button className="px-3 py-2 rounded-xl text-sm font-medium bg-neutral-800 text-neutral-300 border border-neutral-700 hover:text-[#D5FF00] hover:border-[#D5FF00]/50 transition" onClick={() => window.print()}>
-                  Print / Save PDF
+                <button className={btnSecondary} onClick={() => window.print()}>
+                  {t("printSavePdf")}
                 </button>
-                <button className="px-3 py-2 rounded-xl text-sm font-medium bg-neutral-800 text-neutral-300 border border-neutral-700 hover:text-white hover:bg-neutral-700 transition" onClick={() => setPreviewOpen(false)}>
-                  Close
+                <button className={btnSecondary} onClick={() => setPreviewOpen(false)}>
+                  {t("close")}
                 </button>
               </div>
             </div>
@@ -1771,6 +1947,7 @@ export default function App() {
                     draft={draft}
                     totals={totalsForPreview}
                     storageKey={KEY}
+                    t={t}
                   />
                 </div>
               </div>
@@ -1786,32 +1963,32 @@ export default function App() {
           <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
             <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
               <div>
-                <div className="text-lg font-semibold text-neutral-800">Saved check</div>
+                <div className="text-lg font-semibold text-neutral-800">{t("savedCheck")}</div>
                 <div className="text-sm text-neutral-600">
                   {selectedSavedCheck.date || "-"} • {selectedSavedCheck.vehicleLabel || selectedSavedCheck.vehicleId || "-"}
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button className={btnSecondary} onClick={() => exportSingleCheck(selectedSavedCheck)}>
-                  Export
+                  {t("export")}
                 </button>
                 <button className={btnSecondary} onClick={() => downloadSingleCheckTxt(selectedSavedCheck)}>
-                  TXT
+                  {t("TXT")}
                 </button>
                 <button className={btnSecondary} onClick={() => copySingleCheck(selectedSavedCheck)}>
-                  Copy
+                  {t("copy")}
                 </button>
                 <button className={btnSecondary} onClick={() => sendSingleCheck(selectedSavedCheck)}>
-                  Send
+                  {t("send")}
                 </button>
                 <button className={btnSecondary} onClick={() => window.print()}>
-                  Print / Save PDF
+                  {t("printSavePdf")}
                 </button>
                 <button className={btnDanger} onClick={() => deleteCheck(selectedSavedCheck.id)}>
-                  Delete
+                  {t("delete")}
                 </button>
                 <button className={btnSecondary} onClick={() => setSavedOpen(false)}>
-                  Close
+                  {t("close")}
                 </button>
               </div>
             </div>
@@ -1834,6 +2011,7 @@ export default function App() {
                     }
                   }
                   storageKey={KEY}
+                  t={t}
                 />
               </div>
             </div>
@@ -1846,7 +2024,7 @@ export default function App() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="w-full flex justify-center mb-6">
+            <div className="w-full flex justify-center mb-2">
               <img
                 src={vehicleCheckItHeading}
                 alt="Vehicle CheckIt"
@@ -1867,9 +2045,9 @@ export default function App() {
                   disabled={totalItems === 0}
                   className="h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 disabled:opacity-50 disabled:cursor-not-allowed z-10 relative"
                 >
-                  PREVIEW
+                  {t("preview")}
                 </button>
-                <DataMenu onExport={exportJSON} onImport={importJSON} />
+                <DataMenu onExport={exportJSON} onImport={importJSON} t={t} />
               </div>
 
               <div className="absolute right-0 top-0">
@@ -1879,25 +2057,25 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-2">
           <LanguageSelector current={profile.language} onChange={(l) => setProfile((p) => ({ ...p, language: l }))} />
         </div>
 
         <div className="mt-2 grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className={card}>
             <div className={cardHead}>
-              <div className="font-semibold text-neutral-800">Vehicle profile</div>
+              <div className="font-semibold text-neutral-800">{t("vehicleProfile")}</div>
               <div className="text-xs text-neutral-600 mt-1">
-                Stored in <span className="font-mono">{PROFILE_KEY}</span>
+                {t("storedIn")} <span className="font-mono">{PROFILE_KEY}</span>
               </div>
             </div>
 
             <div className={`${cardPad} space-y-3`}>
               <label className="text-sm block">
-                <div className="text-neutral-700 font-medium">Active vehicle</div>
+                <div className="text-neutral-700 font-medium">{t("activeVehicle")}</div>
                 <select className={inputBase} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
                   {vehicles.length === 0 ? (
-                    <option value="">No vehicles yet</option>
+                    <option value="">{t("noVehiclesYet")}</option>
                   ) : (
                     vehicles.map((v) => (
                       <option key={v.id} value={v.id}>
@@ -1919,28 +2097,28 @@ export default function App() {
                   {activeVehicle.notes ? <div className="mt-2 text-xs text-neutral-600 whitespace-pre-wrap">{activeVehicle.notes}</div> : null}
                 </div>
               ) : (
-                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600">Add a vehicle profile to start.</div>
+                <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-600">{t("noVehiclesAdd")}</div>
               )}
 
               <div className="flex flex-col gap-2">
                 <button className={btnSecondary} onClick={openVehicleManager}>
-                  Manage vehicles
+                  {t("manageVehicles")}
                 </button>
                 <button className={btnSecondary} onClick={startAddVehicle}>
-                  Add vehicle
+                  {t("addVehicle")}
                 </button>
               </div>
 
-              <div className="text-xs text-neutral-600">Once added, vehicles are saved as a profile and can be edited anytime.</div>
+              <div className="text-xs text-neutral-600">{t("profilesInfo")}</div>
 
               <div className="pt-2">
-                <div className="text-xs font-semibold text-neutral-700">Status</div>
+                <div className="text-xs font-semibold text-neutral-700">{t("status")}</div>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Pill tone="accent">{doneCount} done</Pill>
-                  <Pill>{totalItems} total</Pill>
-                  {issueCount ? <Pill tone="danger">{issueCount} issues</Pill> : <Pill>0 issues</Pill>}
+                  <Pill tone="accent">{doneCount} {t("done")}</Pill>
+                  <Pill>{totalItems} {t("total")}</Pill>
+                  {issueCount ? <Pill tone="danger">{issueCount} {t("issuesCount")}</Pill> : <Pill>0 {t("issuesCount")}</Pill>}
                   <Pill>
-                    Module: {moduleManifest.id}.{moduleManifest.version}
+                    {t("module")}: {moduleManifest.id}.{moduleManifest.version}
                   </Pill>
                 </div>
               </div>
@@ -1950,20 +2128,20 @@ export default function App() {
           <div className={`${card} lg:col-span-3`}>
             <div className={`${cardHead} flex flex-wrap items-end justify-between gap-3`}>
               <div>
-                <div className="font-semibold text-neutral-800">New vehicle check</div>
+                <div className="font-semibold text-neutral-800">{t("newCheck")}</div>
                 <div className="text-sm text-neutral-700">
-                  Items: {doneCount}/{totalItems} • Issues: {issueCount}
+                  {t("items")}: {doneCount}/{totalItems} • {t("issues")}: {issueCount}
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <label className="text-sm">
-                  <div className="text-neutral-700 font-medium">Date</div>
+                  <div className="text-neutral-700 font-medium">{t("date")}</div>
                   <input type="date" className={inputBase} value={date} onChange={(e) => setDate(e.target.value)} />
                 </label>
 
                 <label className="text-sm">
-                  <div className="text-neutral-700 font-medium">Vehicle</div>
+                  <div className="text-neutral-700 font-medium">{t("vehicle")}</div>
                   <select className={inputBase} value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
                     {vehicles.map((v) => (
                       <option key={v.id} value={v.id}>
@@ -1974,7 +2152,7 @@ export default function App() {
                 </label>
 
                 <label className="text-sm">
-                  <div className="text-neutral-700 font-medium">Odometer</div>
+                  <div className="text-neutral-700 font-medium">{t("odometer")}</div>
                   <input
                     className={inputBase}
                     placeholder="e.g., 123456"
@@ -1987,8 +2165,17 @@ export default function App() {
             </div>
 
             <div className={cardPad}>
+              {activeVehicle?.tuvUntil ? (
+                <div className="mb-4">
+                  <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-[#D5FF00]/40 bg-[#D5FF00]/10 text-xs text-neutral-800">
+                    <span className="font-bold">ℹ {t("tuvExpiry")}:</span>
+                    <span>{activeVehicle.tuvUntil}</span>
+                  </span>
+                </div>
+              ) : null}
+
               <label className="block text-sm mb-3">
-                <div className="text-neutral-700 font-medium">Service / Dashboard Alerts</div>
+                <div className="text-neutral-700 font-medium">{t("serviceAlerts")}</div>
                 <textarea
                   className={inputBase + " min-h-[60px]"}
                   placeholder="e.g. Service due in 1500km, Oil change required..."
@@ -1998,7 +2185,7 @@ export default function App() {
               </label>
 
               <label className="block text-sm">
-                <div className="text-neutral-700 font-medium">General notes</div>
+                <div className="text-neutral-700 font-medium">{t("generalNotes")}</div>
                 <textarea
                   className={inputBase + " min-h-[96px]"}
                   placeholder="Anything important about the vehicle today"
@@ -2013,7 +2200,7 @@ export default function App() {
                     <div className="font-semibold text-neutral-800">{s.title}</div>
                     <div className="mt-2 space-y-2">
                       {s.items.map((it) => (
-                        <ItemCard key={it.id} sectionId={s.id} item={it} updateItem={updateItem} />
+                        <ItemCard key={it.id} sectionId={s.id} item={it} updateItem={updateItem} t={t} lang={lang} />
                       ))}
                     </div>
                   </div>
@@ -2022,15 +2209,15 @@ export default function App() {
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
                 <button className={btnSecondary} onClick={resetDraft}>
-                  Reset
+                  {t("reset")}
                 </button>
 
                 <div className="flex items-center gap-2">
                   <button className={btnSecondary} onClick={openPreview}>
-                    Preview
+                    {t("preview")}
                   </button>
                   <button className={btnSecondary} onClick={saveCheck}>
-                    Save check
+                    {t("saveCheck")}
                   </button>
                 </div>
               </div>
@@ -2040,24 +2227,24 @@ export default function App() {
 
         <div className={`mt-4 ${card}`}>
           <div className={cardHead}>
-            <div className="font-semibold text-neutral-800">Saved checks</div>
-            <div className="text-sm text-neutral-700">Your history (stored locally on this device).</div>
+            <div className="font-semibold text-neutral-800">{t("savedChecks")}</div>
+            <div className="text-sm text-neutral-700">{t("historyInfo")}</div>
           </div>
 
           <div className={cardPad}>
             {(appState.checks || []).length === 0 ? (
-              <div className="text-sm text-neutral-600">No saved checks yet.</div>
+              <div className="text-sm text-neutral-600">{t("noSavedChecks")}</div>
             ) : (
               <div className="overflow-auto">
                 <table className="w-full text-sm">
                   <thead className="text-left text-neutral-600">
                     <tr className="border-b">
-                      <th className="py-2 pr-2">Date</th>
-                      <th className="py-2 pr-2">Vehicle</th>
-                      <th className="py-2 pr-2">Odometer</th>
-                      <th className="py-2 pr-2">Issues</th>
-                      <th className="py-2 pr-2">Items</th>
-                      <th className="py-2 pr-2 text-right">Actions</th>
+                      <th className="py-2 pr-2">{t("date")}</th>
+                      <th className="py-2 pr-2">{t("vehicle")}</th>
+                      <th className="py-2 pr-2">{t("odometer")}</th>
+                      <th className="py-2 pr-2">{t("issues")}</th>
+                      <th className="py-2 pr-2">{t("items")}</th>
+                      <th className="py-2 pr-2 text-right">{t("actions")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2084,7 +2271,7 @@ export default function App() {
                         <td className="py-2 pr-2 text-right">
                           <div className="flex flex-wrap items-center justify-end gap-2">
                             <button className={btnMini} onClick={() => openSaved(c.id)}>
-                              View
+                              {t("view")}
                             </button>
                           </div>
                         </td>
@@ -2110,10 +2297,10 @@ export default function App() {
               }
             }}
           >
-            Return to ToolStack hub
+            {t("returnHub")}
           </a>
           <div className="text-xs text-neutral-600">
-            Storage key: <span className="font-mono">{KEY}</span>
+            {t("storageKey")}: <span className="font-mono">{KEY}</span>
           </div>
         </div>
 
