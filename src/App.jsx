@@ -34,6 +34,8 @@ import {
   formatVehicleLabel,
 } from "./lib/core";
 
+import vehicleCheckItHeading from "./assets/vehiclecheckit-heading.png";
+
 function badgeFor(sev) {
   if (sev === "issue") return "bg-red-100 text-red-800 border-red-200";
   if (sev === "note") return "bg-amber-100 text-amber-800 border-amber-200";
@@ -74,6 +76,12 @@ function buildCheckSummaryText(check) {
     `Items: ${(c.summary?.doneCount ?? 0)}/${(c.summary?.totalItems ?? 0)}`
   );
   lines.push(`Issues: ${(c.summary?.issueCount ?? 0)}`);
+
+  if (c.serviceNotes) {
+    lines.push("");
+    lines.push("Service / Dashboard Alerts:");
+    lines.push(String(c.serviceNotes));
+  }
 
   if (c.generalNotes) {
     lines.push("");
@@ -538,12 +546,12 @@ function HelpIconButton({ onClick, title = "Help" }) {
       title={title}
       aria-label={title}
       className={
-        "print:hidden h-10 w-10 shrink-0 rounded-xl border border-neutral-200 bg-white shadow-sm " +
-        "hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] active:translate-y-[1px] transition flex items-center justify-center " +
-        "focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300"
+        "print:hidden h-10 w-10 shrink-0 rounded-xl border transition shadow-sm active:translate-y-[1px] flex items-center justify-center " +
+        "bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 " +
+        "focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative"
       }
     >
-      <span className="text-sm font-black text-neutral-700">?</span>
+      <span className="text-lg font-bold">?</span>
     </button>
   );
 }
@@ -552,133 +560,117 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
   if (!open) return null;
 
   const Section = ({ title, children }) => (
-    <section className="space-y-2">
-      <h3 className="text-sm font-semibold text-neutral-900">{title}</h3>
-      <div className="text-sm text-neutral-700 leading-relaxed space-y-2">{children}</div>
+    <section className="space-y-3">
+      <h3 className="text-xs font-black text-[#D5FF00] uppercase tracking-widest">{title}</h3>
+      <div className="text-sm text-neutral-400 leading-relaxed space-y-2">{children}</div>
     </section>
   );
 
-  const Bullet = ({ children }) => <li className="ml-4 list-disc">{children}</li>;
+  const Bullet = ({ children }) => <li className="ml-4 list-disc marker:text-[#D5FF00] pl-1">{children}</li>;
 
   const ActionRow = ({ name, desc }) => (
-    <div className="flex items-start justify-between gap-4 py-2 border-b border-neutral-100 last:border-b-0">
-      <div className="text-sm font-medium text-neutral-900">{name}</div>
-      <div className="text-sm text-neutral-600 text-right">{desc}</div>
+    <div className="flex items-start justify-between gap-4 py-3 border-b border-neutral-800 last:border-b-0">
+      <div className="text-sm font-bold text-neutral-200">{name}</div>
+      <div className="text-sm text-neutral-500 text-right">{desc}</div>
     </div>
   );
 
   const baseActions = [
-    { name: "Preview", desc: "Shows a clean report sheet inside the app (print-safe)." },
-    { name: "Print / Save PDF", desc: "Uses your browser print dialog to print or save a PDF." },
-    { name: "Export", desc: "Downloads a JSON backup file of your saved data." },
-    { name: "Import", desc: "Loads a JSON backup file and replaces the current saved data." },
+    { name: "Preview", desc: "View print-safe report sheet." },
+    { name: "Print / PDF", desc: "Print or save as PDF via browser." },
+    { name: "Export", desc: "Download JSON backup." },
+    { name: "Import", desc: "Restore from JSON backup." },
   ];
 
   const extra = (actions || []).map((a) => ({ name: a, desc: "Extra tool for this app." }));
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
       <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
-        <div className="w-full max-w-2xl flex flex-col max-h-full rounded-2xl border border-neutral-200 bg-white shadow-2xl overflow-hidden pointer-events-auto">
-          <div className="p-4 border-b border-neutral-100 flex items-start justify-between gap-4 shrink-0">
+        <div className="w-full max-w-2xl flex flex-col max-h-full rounded-2xl border border-neutral-800 bg-neutral-900 shadow-[0_0_50px_-10px_rgba(213,255,0,0.15)] overflow-hidden pointer-events-auto">
+          <div className="p-5 border-b border-neutral-800 flex items-start justify-between gap-4 shrink-0 bg-neutral-900/50">
             <div>
-              <div className="text-sm text-neutral-500">ToolStack • Help Pack v1</div>
-              <h2 className="text-lg font-semibold text-neutral-900">{appName} — how your data works</h2>
-              <div className="mt-3 h-[2px] w-56 rounded-full bg-gradient-to-r from-[#D5FF00]/0 via-[#D5FF00] to-[#D5FF00]/0" />
+              <div className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-1">ToolStack • Help Pack v1</div>
+              <h2 className="text-xl font-black text-white tracking-tight">{appName} <span className="text-neutral-600 font-normal">— Guide</span></h2>
             </div>
 
             <button
               type="button"
-              className="print:hidden px-3 py-2 rounded-xl text-sm font-medium border border-neutral-200 bg-white hover:bg-[#D5FF00]/10 hover:border-[#D5FF00] text-neutral-900 transition focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300"
+              className="print:hidden h-8 w-8 rounded-lg flex items-center justify-center text-neutral-500 hover:text-white hover:bg-neutral-800 transition"
               onClick={onClose}
             >
-              Close
+              ✕
             </button>
           </div>
 
-          <div className="p-4 space-y-5 overflow-y-auto min-h-0">
-            <Section title="Quick start (daily use)">
-              <ul className="space-y-1">
-                <Bullet>Use the app normally — it autosaves as you type.</Bullet>
-                <Bullet>
-                  Use <b>Preview</b> → then <b>Print / Save PDF</b> for a clean report.
-                </Bullet>
-                <Bullet>
-                  Use <b>Export</b> regularly to create backups.
-                </Bullet>
-              </ul>
+          <div className="p-6 space-y-8 overflow-y-auto min-h-0 custom-scrollbar">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Section title="Quick Start">
+                <ul className="space-y-2">
+                  <Bullet>App <b>autosaves</b> as you type.</Bullet>
+                  <Bullet>Use <b>Preview</b> to check your report.</Bullet>
+                  <Bullet><b>Print / Save PDF</b> to finish.</Bullet>
+                </ul>
+              </Section>
+
+              <Section title="Data Privacy">
+                <p>
+                  Data lives in your browser's <b>Local Storage</b> on this device.
+                </p>
+                <p className="text-neutral-500 text-xs mt-2">
+                  No cloud upload. No login. Your data stays here unless you export it.
+                </p>
+              </Section>
+            </div>
+
+            <Section title="Backup & Restore">
+              <div className="rounded-xl border border-neutral-800 bg-neutral-800/30 p-4 space-y-3">
+                <div className="flex gap-3">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[#D5FF00] font-bold text-xs">1</div>
+                  <div>
+                    <div className="text-neutral-200 font-bold text-sm">Export Regularly</div>
+                    <div className="text-neutral-500 text-xs mt-1">Download a JSON backup weekly or after big changes. Save it to a secure location.</div>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[#D5FF00] font-bold text-xs">2</div>
+                  <div>
+                    <div className="text-neutral-200 font-bold text-sm">Import to Restore</div>
+                    <div className="text-neutral-500 text-xs mt-1">Use Import to load a backup file. This replaces current data on this device.</div>
+                  </div>
+                </div>
+              </div>
             </Section>
 
-            <Section title="Where your data lives (important)">
-              <p>
-                Your data is saved automatically in your browser on <b>this device</b> using local storage (localStorage).
-              </p>
-              <ul className="space-y-1">
-                <Bullet>No login is required (for now).</Bullet>
-                <Bullet>If you switch device/browser/profile, your data will not follow automatically.</Bullet>
-              </ul>
-            </Section>
-
-            <Section title="Backup routine (recommended)">
-              <ul className="space-y-1">
-                <Bullet>
-                  Export after major changes, or at least <b>weekly</b>.
-                </Bullet>
-                <Bullet>Keep 2–3 older exports as a fallback.</Bullet>
-                <Bullet>Save exports somewhere safe (Drive/Dropbox/OneDrive) or email them to yourself.</Bullet>
-              </ul>
-            </Section>
-
-            <Section title="Restore / move to a new device (Import)">
-              <p>
-                On a new device/browser (or after clearing site data), use <b>Import</b> and select your latest exported JSON.
-              </p>
-              <ul className="space-y-1">
-                <Bullet>Import replaces the current saved data with the file’s contents.</Bullet>
-                <Bullet>If an import fails, try an older export (versions can differ).</Bullet>
-              </ul>
-            </Section>
-
-            <Section title="Buttons glossary (same meaning across ToolStack)">
-              <div className="rounded-2xl border border-neutral-200 bg-white px-3">
+            <Section title="Interface Glossary">
+              <div className="rounded-xl border border-neutral-800 bg-neutral-900 px-4">
                 {[...baseActions, ...extra].map((a) => (
                   <ActionRow key={a.name} name={a.name} desc={a.desc} />
                 ))}
               </div>
             </Section>
 
-            <Section title="What can erase local data">
-              <ul className="space-y-1">
-                <Bullet>Clearing browser history / site data.</Bullet>
-                <Bullet>Private/incognito mode.</Bullet>
-                <Bullet>Some “cleanup/optimizer” tools.</Bullet>
-                <Bullet>Reinstalling the browser or using a different browser profile.</Bullet>
-              </ul>
-            </Section>
-
-            <Section title="Storage key (for troubleshooting)">
-              <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
-                <span className="font-medium">localStorage key:</span>{" "}
-                <span className="font-mono">{storageKey}</span>
-              </div>
-              <div className="mt-2 text-xs text-neutral-500">
-                Shared profile key: <span className="font-mono">{PROFILE_KEY}</span>
-              </div>
-            </Section>
-
-            <Section title="Privacy">
-              <p>By default, your data stays on your device. It only leaves your device if you export it or share it yourself.</p>
-            </Section>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Section title="Data Safety">
+                <p className="text-xs text-neutral-500">Avoid clearing browser "Site Data" or using "Private/Incognito" mode if you want to keep data persistent.</p>
+              </Section>
+              <Section title="System Info">
+                <div className="text-xs text-neutral-600 font-mono bg-neutral-950 p-2 rounded border border-neutral-800">
+                  Key: {storageKey}<br />
+                  Profile: {PROFILE_KEY}
+                </div>
+              </Section>
+            </div>
           </div>
 
-          <div className="p-4 border-t border-neutral-100 flex items-center justify-end gap-2 shrink-0">
+          <div className="p-4 border-t border-neutral-800 bg-neutral-900/50 flex items-center justify-end gap-2 shrink-0">
             <button
               type="button"
-              className="print:hidden px-3 py-2 rounded-xl text-sm font-medium border border-neutral-700 bg-neutral-700 text-white hover:bg-[#D5FF00] hover:border-[#D5FF00] hover:text-neutral-900 transition focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300"
+              className="print:hidden px-4 py-2 rounded-xl text-sm font-bold tracking-wide border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30"
               onClick={onClose}
             >
-              Got it
+              Close Guide
             </button>
           </div>
         </div>
@@ -908,7 +900,7 @@ function VehicleProfilesModal({
   );
 }
 
-function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, draft, totals, storageKey }) {
+function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serviceNotes, draft, totals, storageKey }) {
   const sections = draft?.sections || [];
   return (
     <div className="mx-auto max-w-4xl print:max-w-none print:w-full">
@@ -940,6 +932,13 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, draf
           <div className="text-xs text-neutral-600 mt-1">Odometer: {odometer || "—"}</div>
         </div>
       </div>
+
+      {serviceNotes ? (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm">
+          <div className="font-semibold text-amber-900">Service / Dashboard Alerts</div>
+          <div className="mt-1 text-amber-800 whitespace-pre-wrap">{serviceNotes}</div>
+        </div>
+      ) : null}
 
       {generalNotes ? (
         <div className="mt-4 rounded-2xl border border-neutral-200 p-4 text-sm">
@@ -1076,6 +1075,135 @@ const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem }) {
   );
 });
 
+function DataMenu({ onExport, onImport }) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative"
+      >
+        DATA / SYNC
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-12 z-50 w-72 p-2 rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] origin-top-right animate-in fade-in zoom-in-95 duration-100">
+          <div className="px-3 py-2 text-[10px] font-black text-neutral-500 uppercase tracking-widest border-b border-neutral-800 mb-1">
+            System Data
+          </div>
+
+          <button
+            onClick={() => {
+              onExport();
+              setOpen(false);
+            }}
+            className="w-full text-left px-3 py-3 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+          >
+            <span>Export Backup</span>
+            <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
+              JSON
+            </span>
+          </button>
+
+          <label className="w-full text-left px-3 py-3 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between cursor-pointer">
+            <span>Import Data</span>
+            <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
+              UPLOAD
+            </span>
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                if (file) onImport(file);
+                e.target.value = "";
+                setOpen(false);
+              }}
+            />
+          </label>
+
+          <div className="mt-2 px-3 py-2 text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-800">
+            Secure local storage. Export regularly to prevent data loss.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LanguageSelector({ current, onChange }) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const langs = [
+    { code: "EN", label: "English" },
+    { code: "DE", label: "Deutsch" },
+    { code: "FR", label: "Français" },
+    { code: "ES", label: "Español" },
+  ];
+
+  const active = langs.find((l) => l.code === current) || langs[0];
+
+  return (
+    <div className="relative z-20" ref={menuRef}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="h-8 px-3 rounded-xl text-xs font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center gap-2 bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50"
+      >
+        <span>{active.code}</span>
+        <span className="text-[10px] opacity-50">▼</span>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-10 w-32 p-1 rounded-xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] origin-top-right animate-in fade-in zoom-in-95 duration-100">
+          {langs.map((l) => (
+            <button
+              key={l.code}
+              onClick={() => {
+                onChange(l.code);
+                setOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between ${
+                current === l.code
+                  ? "bg-neutral-800 text-[#D5FF00]"
+                  : "text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800"
+              }`}
+            >
+              {l.label}
+              {current === l.code && <span>✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [profile, setProfile] = useState(loadProfile());
   const [appState, setAppState] = useState(loadState());
@@ -1084,6 +1212,7 @@ export default function App() {
   const [vehicleId, setVehicleId] = useState(profile.vehicles?.[0]?.id || "");
 
   const [odometerText, setOdometerText] = useState("");
+  const [serviceNotesText, setServiceNotesText] = useState("");
   const [generalNotesText, setGeneralNotesText] = useState("");
 
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
@@ -1210,6 +1339,7 @@ export default function App() {
     });
 
     setOdometerText("");
+    setServiceNotesText("");
     setGeneralNotesText("");
     notify("Reset");
   }
@@ -1222,6 +1352,7 @@ export default function App() {
       vehicleId,
       vehicleLabel,
       odometer: String(odometerText || "").trim(),
+      serviceNotes: String(serviceNotesText || "").trim(),
       generalNotes: String(generalNotesText || "").trim(),
       sections: draft.sections,
       summary: { totalItems, doneCount, issueCount },
@@ -1612,33 +1743,36 @@ export default function App() {
 
       {previewOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
-          <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={() => setPreviewOpen(false)} />
+          <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-md" onClick={() => setPreviewOpen(false)} />
 
           <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
-            <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex items-center justify-between gap-3 shrink-0">
-              <div className="text-lg font-semibold text-neutral-800">Print preview</div>
+            <div className="mb-3 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_0_15px_-3px_rgba(213,255,0,0.15)] p-3 flex items-center justify-between gap-3 shrink-0">
+              <div className="text-lg font-bold tracking-wide text-[#D5FF00] pl-2">PRINT PREVIEW</div>
               <div className="flex items-center gap-2">
-                <button className={btnSecondary} onClick={() => window.print()}>
+                <button className="px-3 py-2 rounded-xl text-sm font-medium bg-neutral-800 text-neutral-300 border border-neutral-700 hover:text-[#D5FF00] hover:border-[#D5FF00]/50 transition" onClick={() => window.print()}>
                   Print / Save PDF
                 </button>
-                <button className={btnSecondary} onClick={() => setPreviewOpen(false)}>
+                <button className="px-3 py-2 rounded-xl text-sm font-medium bg-neutral-800 text-neutral-300 border border-neutral-700 hover:text-white hover:bg-neutral-700 transition" onClick={() => setPreviewOpen(false)}>
                   Close
                 </button>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white border border-neutral-200 shadow-2xl overflow-auto min-h-0">
-              <div id="vc-print-preview" className="p-6">
-                <ReportSheet
-                  profile={profile}
-                  date={date}
-                  vehicleLabel={vehicleLabel}
-                  odometer={String(odometerText || "").trim()}
-                  generalNotes={String(generalNotesText || "").trim()}
-                  draft={draft}
-                  totals={totalsForPreview}
-                  storageKey={KEY}
-                />
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 shadow-2xl overflow-hidden min-h-0 flex flex-col">
+              <div className="overflow-auto p-4 sm:p-8 custom-scrollbar">
+                <div id="vc-print-preview" className="mx-auto max-w-4xl bg-white p-8 rounded-xl shadow-lg text-neutral-900">
+                  <ReportSheet
+                    profile={profile}
+                    date={date}
+                    vehicleLabel={vehicleLabel}
+                    odometer={String(odometerText || "").trim()}
+                    serviceNotes={String(serviceNotesText || "").trim()}
+                    generalNotes={String(generalNotesText || "").trim()}
+                    draft={draft}
+                    totals={totalsForPreview}
+                    storageKey={KEY}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1689,6 +1823,7 @@ export default function App() {
                   date={selectedSavedCheck.date}
                   vehicleLabel={selectedSavedCheck.vehicleLabel || selectedSavedCheck.vehicleId}
                   odometer={String(selectedSavedCheck.odometer || "").trim()}
+                  serviceNotes={String(selectedSavedCheck.serviceNotes || "").trim()}
                   generalNotes={String(selectedSavedCheck.generalNotes || "").trim()}
                   draft={{ sections: selectedSavedCheck.sections || [] }}
                   totals={
@@ -1711,27 +1846,30 @@ export default function App() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="text-4xl sm:text-5xl font-black tracking-tight text-neutral-700">
-              <span>Vehicle Check</span>
-              <span className="text-[#D5FF00]">It</span>
+            <div className="w-full flex justify-center mb-6">
+              <img
+                src={vehicleCheckItHeading}
+                alt="Vehicle CheckIt"
+                className="max-w-full h-auto object-contain"
+              />
             </div>
-            <div className="text-sm text-neutral-700">Safety inspection list for your vehicle</div>
-            <div className="mt-3 h-[2px] w-80 rounded-full bg-gradient-to-r from-[#D5FF00]/0 via-[#D5FF00] to-[#D5FF00]/0" />
           </div>
 
           <div className="w-full sm:w-[820px]">
             <div className="relative">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 pr-12">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 pr-12">
                 <ActionButton onClick={openHub} title="Return to ToolStack hub">
                   Hub
                 </ActionButton>
-                <ActionButton onClick={openPreview} disabled={totalItems === 0}>
-                  Preview
-                </ActionButton>
-                <ActionButton onClick={exportJSON}>Export</ActionButton>
-                <ActionFileButton onFile={(f) => importJSON(f)} accept="application/json,.json">
-                  Import
-                </ActionFileButton>
+                <button
+                  type="button"
+                  onClick={openPreview}
+                  disabled={totalItems === 0}
+                  className="h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 disabled:opacity-50 disabled:cursor-not-allowed z-10 relative"
+                >
+                  PREVIEW
+                </button>
+                <DataMenu onExport={exportJSON} onImport={importJSON} />
               </div>
 
               <div className="absolute right-0 top-0">
@@ -1741,9 +1879,11 @@ export default function App() {
           </div>
         </div>
 
+        <div className="flex justify-end mt-4">
+          <LanguageSelector current={profile.language} onChange={(l) => setProfile((p) => ({ ...p, language: l }))} />
+        </div>
 
-
-        <div className="mt-5 grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="mt-2 grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className={card}>
             <div className={cardHead}>
               <div className="font-semibold text-neutral-800">Vehicle profile</div>
@@ -1847,6 +1987,16 @@ export default function App() {
             </div>
 
             <div className={cardPad}>
+              <label className="block text-sm mb-3">
+                <div className="text-neutral-700 font-medium">Service / Dashboard Alerts</div>
+                <textarea
+                  className={inputBase + " min-h-[60px]"}
+                  placeholder="e.g. Service due in 1500km, Oil change required..."
+                  value={serviceNotesText}
+                  onChange={(e) => setServiceNotesText(e.target.value)}
+                />
+              </label>
+
               <label className="block text-sm">
                 <div className="text-neutral-700 font-medium">General notes</div>
                 <textarea
