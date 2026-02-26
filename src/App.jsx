@@ -748,15 +748,6 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
     </div>
   );
 
-  const baseActions = [
-    { name: t("preview"), desc: "View print-safe report sheet." },
-    { name: t("printSavePdf"), desc: "Print or save as PDF via browser." },
-    { name: t("export"), desc: "Download JSON backup." },
-    { name: t("importData"), desc: "Restore from JSON backup." },
-  ];
-
-  const extra = (actions || []).map((a) => ({ name: a, desc: "Extra tool for this app." }));
-
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
@@ -778,63 +769,70 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
           </div>
 
           <div className="p-6 space-y-8 overflow-y-auto min-h-0 custom-scrollbar">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Section title={t("quickStart")}>
-                <ul className="space-y-2">
-                  <Bullet>App <b>autosaves</b> as you type.</Bullet>
-                  <Bullet>Use <b>Preview</b> to check your report.</Bullet>
-                  <Bullet><b>Print / Save PDF</b> to finish.</Bullet>
-                </ul>
-              </Section>
-
-              <Section title={t("dataPrivacy")}>
-                <p>
-                  Data lives in your browser's <b>Local Storage</b> on this device.
-                </p>
-                <p className="text-neutral-500 text-xs mt-2">
-                  No cloud upload. No login.
-                </p>
-              </Section>
-            </div>
-
-            <Section title={t("backupRestore")}>
-              <div className="rounded-xl border border-neutral-800 bg-neutral-800/30 p-4 space-y-3">
-                <div className="flex gap-3">
-                  <div className="shrink-0 w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[#D5FF00] font-bold text-xs">1</div>
-                  <div>
-                    <div className="text-neutral-200 font-bold text-sm">{t("exportBackup")}</div>
-                    <div className="text-neutral-500 text-xs mt-1">Download a JSON backup weekly or after big changes. Save it to a secure location.</div>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <div className="shrink-0 w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[#D5FF00] font-bold text-xs">2</div>
-                  <div>
-                    <div className="text-neutral-200 font-bold text-sm">{t("importData")}</div>
-                    <div className="text-neutral-500 text-xs mt-1">Use Import to load a backup file. This replaces current data on this device.</div>
-                  </div>
-                </div>
-              </div>
+            <Section title="1) About Vehicle CheckIt">
+              <p>
+                Vehicle CheckIt is a local-first vehicle inspection and condition tracking tool designed to help you record vehicle details, inspection notes, and condition status, then generate clean print-ready reports. It operates fully in your browser with no accounts, no cloud storage, and no automatic data sharing.
+              </p>
             </Section>
 
-            <Section title={t("interfaceGlossary")}>
+            <Section title="2) How Vehicle CheckIt Works">
+              <p>Vehicle CheckIt follows a simple workflow:</p>
+              <ul className="space-y-2 mt-2">
+                <Bullet><b>1. Add Vehicle Details</b><br />Enter key vehicle information (name, plate, identifier, etc.).</Bullet>
+                <Bullet><b>2. Record Inspection Items</b><br />Log inspection checks, notes, and condition status.</Bullet>
+                <Bullet><b>3. Review Condition Overview</b><br />Update and review the vehicle’s overall condition summary.</Bullet>
+                <Bullet><b>4. Preview & Print</b><br />Generate a clean inspection report using Preview.</Bullet>
+                <Bullet><b>5. Export a Backup</b><br />Export a JSON backup regularly, especially after major updates.</Bullet>
+              </ul>
+            </Section>
+
+            <Section title="3) Your Data & Privacy">
+              <p>Your data is saved locally in this browser using secure local storage.</p>
+              <p className="mt-2">This means:</p>
+              <ul className="space-y-1 mt-1">
+                <Bullet>Your data stays on this device</Bullet>
+                <Bullet>Clearing browser data can remove inspection records</Bullet>
+                <Bullet>Incognito/private mode will not retain data</Bullet>
+                <Bullet>Data does not automatically sync across devices</Bullet>
+              </ul>
+            </Section>
+
+            <Section title="4) Backup & Restore">
+              <p><b>Export</b> downloads a JSON backup of your current Vehicle CheckIt data.</p>
+              <p><b>Import</b> restores a previously exported JSON file and replaces current app data.</p>
+              <p className="mt-2 text-xs text-neutral-500 uppercase tracking-widest font-bold">Recommended routine:</p>
+              <ul className="space-y-1 mt-1">
+                <Bullet>Export weekly</Bullet>
+                <Bullet>Export after major edits</Bullet>
+                <Bullet>Store backups in two locations (e.g., Downloads + Drive/USB)</Bullet>
+              </ul>
+            </Section>
+
+            <Section title="5) Buttons Explained">
               <div className="rounded-xl border border-neutral-800 bg-neutral-900 px-4">
-                {[...baseActions, ...extra].map((a) => (
-                  <ActionRow key={a.name} name={a.name} desc={a.desc} />
-                ))}
+                <ActionRow name="Preview" desc="Opens the print-ready inspection report." />
+                <ActionRow name="Print / Save PDF" desc="Prints only the preview sheet. Choose “Save as PDF” to create a file." />
+                <ActionRow name="Export" desc="Downloads a JSON backup file." />
+                <ActionRow name="Import" desc="Restores data from a JSON backup file." />
               </div>
             </Section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Section title={t("dataSafety")}>
-                <p className="text-xs text-neutral-500">Avoid clearing browser "Site Data" or using "Private/Incognito" mode if you want to keep data persistent.</p>
-              </Section>
-              <Section title={t("systemInfo")}>
-                <div className="text-xs text-neutral-600 font-mono bg-neutral-950 p-2 rounded border border-neutral-800">
-                  Key: {storageKey}<br />
-                  Profile: {PROFILE_KEY}
-                </div>
-              </Section>
-            </div>
+            <Section title="6) Storage Keys (Advanced)">
+              <div className="text-xs text-neutral-600 font-mono bg-neutral-950 p-2 rounded border border-neutral-800">
+                App data key: {storageKey}<br />
+                Shared profile key: {PROFILE_KEY}<br />
+                (If additional keys exist, list them below without removing anything.)
+              </div>
+            </Section>
+
+            <Section title="7) Notes / Limitations">
+              <p>Vehicle CheckIt is an inspection logging tool. Reports depend on the accuracy of the information entered.</p>
+              <p className="mt-1">Use Export regularly to avoid data loss.</p>
+            </Section>
+
+            <Section title="8) Support / Feedback">
+              <p>If something breaks, include: device + browser + steps to reproduce + expected vs actual behaviour.</p>
+            </Section>
           </div>
 
           <div className="p-4 border-t border-neutral-800 bg-neutral-900/50 flex items-center justify-end gap-2 shrink-0">
