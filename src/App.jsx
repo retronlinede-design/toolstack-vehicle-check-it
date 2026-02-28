@@ -1247,7 +1247,7 @@ const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem, t, 
   );
 });
 
-function DataMenu({ onExport, onImport, t }) {
+function DataMenu({ onExport, onImport, onPrint, t }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -1261,6 +1261,15 @@ function DataMenu({ onExport, onImport, t }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleEmailDraft = () => {
+    const subject = encodeURIComponent(`Vehicle CheckIt Export Pack – ${new Date().toISOString().split("T")[0]}`);
+    const body = encodeURIComponent(
+      "Attached: PDF export from Vehicle CheckIt (please attach the downloaded PDF file).\n\n" +
+      "Exports are generated locally on your device. No data is uploaded automatically."
+    );
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -1268,13 +1277,59 @@ function DataMenu({ onExport, onImport, t }) {
         onClick={() => setOpen(!open)}
         className="h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative"
       >
-        {t("dataSync")}
+        {t("export")}
       </button>
 
       {open && (
         <div className="absolute right-0 top-12 z-50 w-72 p-2 rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] origin-top-right animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-3 py-2 text-[10px] font-black text-neutral-500 uppercase tracking-widest border-b border-neutral-800 mb-1">
-            {t("systemData")}
+          <div className="px-3 py-2 border-b border-neutral-800 mb-1">
+            <div className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">
+              Export Pack
+            </div>
+            <div className="text-[10px] text-neutral-400 mt-0.5">
+              Save, share, or back up your data.
+            </div>
+          </div>
+
+          <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">
+            PDF & Print
+          </div>
+
+          <button
+            onClick={() => {
+              if (onPrint) onPrint();
+              setOpen(false);
+            }}
+            className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+          >
+            <span>Download PDF</span>
+            <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
+              PDF
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (onPrint) onPrint();
+              setOpen(false);
+            }}
+            className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+          >
+            <span>Print / Save PDF</span>
+          </button>
+
+          <button
+            onClick={() => {
+              handleEmailDraft();
+              setOpen(false);
+            }}
+            className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+          >
+            <span>Create Email Draft</span>
+          </button>
+
+          <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-2 border-t border-neutral-800 pt-2">
+            JSON Backup
           </div>
 
           <button
@@ -1282,16 +1337,16 @@ function DataMenu({ onExport, onImport, t }) {
               onExport();
               setOpen(false);
             }}
-            className="w-full text-left px-3 py-3 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+            className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
           >
-            <span>{t("exportBackup")}</span>
+            <span>Download JSON</span>
             <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
               JSON
             </span>
           </button>
 
-          <label className="w-full text-left px-3 py-3 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between cursor-pointer">
-            <span>{t("importData")}</span>
+          <label className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between cursor-pointer">
+            <span>Import JSON</span>
             <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
               {t("upload")}
             </span>
@@ -1308,7 +1363,11 @@ function DataMenu({ onExport, onImport, t }) {
             />
           </label>
 
-          <div className="mt-2 px-3 py-2 text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-800">
+          <div className="px-3 pb-2 text-[10px] text-neutral-500 italic">
+            Import replaces current app data. Export first if unsure.
+          </div>
+
+          <div className="mt-1 px-3 py-2 text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-800">
             {t("secureStorage")}
           </div>
         </div>
@@ -2045,7 +2104,7 @@ export default function App() {
                 >
                   {t("preview")}
                 </button>
-                <DataMenu onExport={exportJSON} onImport={importJSON} t={t} />
+                <DataMenu onExport={exportJSON} onImport={importJSON} onPrint={() => window.print()} t={t} />
               </div>
 
               <div className="absolute right-0 top-0">
