@@ -121,7 +121,72 @@ const T = {
     closeGuide: "Close Guide",
     ok: "OK",
     note: "Note",
-    issue: "Issue"
+    issue: "Issue",
+    exportPack: "Export Pack",
+    exportInfo: "Save, share, or back up your data.",
+    pdfPrint: "PDF & Print",
+    downloadPdf: "Download PDF",
+    createEmailDraft: "Create Email Draft",
+    jsonBackup: "JSON Backup",
+    downloadJson: "Download JSON",
+    importJson: "Import JSON",
+    importWarning: "Import replaces current app data. Export first if unsure.",
+    egPlate: "e.g., M-AB 1234",
+    egMake: "e.g., BMW",
+    egModel: "e.g., 530i",
+    egYear: "e.g., 2023",
+    vinPlaceholder: "Vehicle Identification Number",
+    notesPlaceholder: "Anything useful (tyre size, quirks, etc.)",
+    describeIssue: "Describe the issue",
+    addNote: "Add a note",
+    serviceAlertsPlaceholder: "e.g. Service due in 1500km, Oil change required...",
+    generalNotesPlaceholder: "Anything important about the vehicle today",
+    odometerPlaceholder: "e.g., 123456",
+    aboutTitle: "1) About Vehicle CheckIt",
+    aboutText: "Vehicle CheckIt is a local-first vehicle inspection and condition tracking tool designed to help you record vehicle details, inspection notes, and condition status, then generate clean print-ready reports. It operates fully in your browser with no accounts, no cloud storage, and no automatic data sharing.",
+    howWorksTitle: "2) How Vehicle CheckIt Works",
+    howWorksText: "Vehicle CheckIt follows a simple workflow:",
+    step1: "1. Add Vehicle Details",
+    step1Desc: "Enter key vehicle information (name, plate, identifier, etc.).",
+    step2: "2. Record Inspection Items",
+    step2Desc: "Log inspection checks, notes, and condition status.",
+    step3: "3. Review Condition Overview",
+    step3Desc: "Update and review the vehicle’s overall condition summary.",
+    step4: "4. Preview & Print",
+    step4Desc: "Generate a clean inspection report using Preview.",
+    step5: "5. Export a Backup",
+    step5Desc: "Export a JSON backup regularly, especially after major updates.",
+    dataPrivacyTitle: "3) Your Data & Privacy",
+    dataPrivacyText: "Your data is saved locally in this browser using secure local storage.",
+    dataPrivacyList1: "Your data stays on this device",
+    dataPrivacyList2: "Clearing browser data can remove inspection records",
+    dataPrivacyList3: "Incognito/private mode will not retain data",
+    dataPrivacyList4: "Data does not automatically sync across devices",
+    backupRestoreTitle: "4) Backup & Restore",
+    exportDesc: "Export downloads a JSON backup of your current Vehicle CheckIt data.",
+    importDesc: "Import restores a previously exported JSON file and replaces current app data.",
+    recommendedRoutine: "Recommended routine:",
+    routine1: "Export weekly",
+    routine2: "Export after major edits",
+    routine3: "Store backups in two locations (e.g., Downloads + Drive/USB)",
+    buttonsExplainedTitle: "5) Buttons Explained",
+    previewDesc: "Opens the print-ready inspection report.",
+    printSavePdfDesc: "Prints only the preview sheet. Choose “Save as PDF” to create a file.",
+    exportBackupDesc: "Downloads a JSON backup file.",
+    importBackupDesc: "Restores data from a JSON backup file.",
+    storageKeysTitle: "6) Storage Keys (Advanced)",
+    appDataKey: "App data key",
+    sharedProfileKey: "Shared profile key",
+    notesLimitationsTitle: "7) Notes / Limitations",
+    notesLimitationsText1: "Vehicle CheckIt is an inspection logging tool. Reports depend on the accuracy of the information entered.",
+    notesLimitationsText2: "Use Export regularly to avoid data loss.",
+    supportFeedbackTitle: "8) Support / Feedback",
+    supportFeedbackText: "If something breaks, include: device + browser + steps to reproduce + expected vs actual behaviour.",
+    selfTests: "Self-tests",
+    passing: "passing — open console for details",
+    pass: "PASS",
+    fail: "FAIL",
+    txt: "TXT"
   },
   DE: {
     vehicleCheckReport: "Fahrzeugprüfbericht",
@@ -207,7 +272,72 @@ const T = {
     closeGuide: "Anleitung schließen",
     ok: "OK",
     note: "Hinweis",
-    issue: "Mangel"
+    issue: "Mangel",
+    exportPack: "Export-Paket",
+    exportInfo: "Daten speichern, teilen oder sichern.",
+    pdfPrint: "PDF & Drucken",
+    downloadPdf: "PDF herunterladen",
+    createEmailDraft: "E-Mail-Entwurf erstellen",
+    jsonBackup: "JSON-Backup",
+    downloadJson: "JSON herunterladen",
+    importJson: "JSON importieren",
+    importWarning: "Import ersetzt aktuelle App-Daten. Exportieren Sie zuerst, wenn Sie unsicher sind.",
+    egPlate: "z.B. M-AB 1234",
+    egMake: "z.B. BMW",
+    egModel: "z.B. 530i",
+    egYear: "z.B. 2023",
+    vinPlaceholder: "Fahrzeug-Identifizierungsnummer",
+    notesPlaceholder: "Alles Nützliche (Reifengröße, Besonderheiten usw.)",
+    describeIssue: "Problem beschreiben",
+    addNote: "Notiz hinzufügen",
+    serviceAlertsPlaceholder: "z.B. Service fällig in 1500km, Ölwechsel erforderlich...",
+    generalNotesPlaceholder: "Alles Wichtige zum Fahrzeug heute",
+    odometerPlaceholder: "z.B. 123456",
+    aboutTitle: "1) Über Vehicle CheckIt",
+    aboutText: "Vehicle CheckIt ist ein lokales Tool zur Fahrzeuginspektion und Zustandsverfolgung, das Ihnen hilft, Fahrzeugdetails, Inspektionsnotizen und den Zustandsstatus aufzuzeichnen und dann saubere, druckfertige Berichte zu erstellen. Es funktioniert vollständig in Ihrem Browser ohne Konten, Cloud-Speicher und automatische Datenweitergabe.",
+    howWorksTitle: "2) Wie Vehicle CheckIt funktioniert",
+    howWorksText: "Vehicle CheckIt folgt einem einfachen Arbeitsablauf:",
+    step1: "1. Fahrzeugdetails hinzufügen",
+    step1Desc: "Geben Sie wichtige Fahrzeuginformationen ein (Name, Kennzeichen, Kennung usw.).",
+    step2: "2. Inspektionspunkte aufzeichnen",
+    step2Desc: "Protokollieren Sie Inspektionsprüfungen, Notizen und den Zustandsstatus.",
+    step3: "3. Zustandsübersicht überprüfen",
+    step3Desc: "Aktualisieren und überprüfen Sie die Gesamtzustandszusammenfassung des Fahrzeugs.",
+    step4: "4. Vorschau & Drucken",
+    step4Desc: "Erstellen Sie einen sauberen Inspektionsbericht mit der Vorschau.",
+    step5: "5. Backup exportieren",
+    step5Desc: "Exportieren Sie regelmäßig ein JSON-Backup, insbesondere nach größeren Aktualisierungen.",
+    dataPrivacyTitle: "3) Ihre Daten & Datenschutz",
+    dataPrivacyText: "Ihre Daten werden lokal in diesem Browser unter Verwendung von sicherem lokalem Speicher gespeichert.",
+    dataPrivacyList1: "Ihre Daten bleiben auf diesem Gerät",
+    dataPrivacyList2: "Das Löschen von Browserdaten kann Inspektionsdatensätze entfernen",
+    dataPrivacyList3: "Inkognito-/Privatmodus speichert keine Daten",
+    dataPrivacyList4: "Daten werden nicht automatisch über Geräte hinweg synchronisiert",
+    backupRestoreTitle: "4) Backup & Wiederherstellung",
+    exportDesc: "Export lädt ein JSON-Backup Ihrer aktuellen Vehicle CheckIt-Daten herunter.",
+    importDesc: "Import stellt eine zuvor exportierte JSON-Datei wieder her und ersetzt aktuelle App-Daten.",
+    recommendedRoutine: "Empfohlene Routine:",
+    routine1: "Wöchentlich exportieren",
+    routine2: "Nach größeren Bearbeitungen exportieren",
+    routine3: "Backups an zwei Orten speichern (z.B. Downloads + Laufwerk/USB)",
+    buttonsExplainedTitle: "5) Erklärte Schaltflächen",
+    previewDesc: "Öffnet den druckfertigen Inspektionsbericht.",
+    printSavePdfDesc: "Druckt nur das Vorschaublatt. Wählen Sie „Als PDF speichern“, um eine Datei zu erstellen.",
+    exportBackupDesc: "Lädt eine JSON-Backup-Datei herunter.",
+    importBackupDesc: "Stellt Daten aus einer JSON-Backup-Datei wieder her.",
+    storageKeysTitle: "6) Speicherschlüssel (Erweitert)",
+    appDataKey: "App-Datenschlüssel",
+    sharedProfileKey: "Geteilter Profilschlüssel",
+    notesLimitationsTitle: "7) Hinweise / Einschränkungen",
+    notesLimitationsText1: "Vehicle CheckIt ist ein Inspektionsprotokollierungstool. Berichte hängen von der Genauigkeit der eingegebenen Informationen ab.",
+    notesLimitationsText2: "Verwenden Sie Export regelmäßig, um Datenverlust zu vermeiden.",
+    supportFeedbackTitle: "8) Support / Feedback",
+    supportFeedbackText: "Wenn etwas kaputt geht, geben Sie an: Gerät + Browser + Schritte zum Reproduzieren + erwartetes vs. tatsächliches Verhalten.",
+    selfTests: "Selbsttests",
+    passing: "bestanden — Konsole für Details öffnen",
+    pass: "BESTANDEN",
+    fail: "FEHLGESCHLAGEN",
+    txt: "TXT"
   }
 };
 
@@ -769,69 +899,65 @@ function HelpModal({ open, onClose, appName = "ToolStack App", storageKey = "(un
           </div>
 
           <div className="p-6 space-y-8 overflow-y-auto min-h-0 custom-scrollbar">
-            <Section title="1) About Vehicle CheckIt">
-              <p>
-                Vehicle CheckIt is a local-first vehicle inspection and condition tracking tool designed to help you record vehicle details, inspection notes, and condition status, then generate clean print-ready reports. It operates fully in your browser with no accounts, no cloud storage, and no automatic data sharing.
-              </p>
+            <Section title={t("aboutTitle")}>
+              <p>{t("aboutText")}</p>
             </Section>
-
-            <Section title="2) How Vehicle CheckIt Works">
-              <p>Vehicle CheckIt follows a simple workflow:</p>
+            <Section title={t("howWorksTitle")}>
+              <p>{t("howWorksText")}</p>
               <ul className="space-y-2 mt-2">
-                <Bullet><b>1. Add Vehicle Details</b><br />Enter key vehicle information (name, plate, identifier, etc.).</Bullet>
-                <Bullet><b>2. Record Inspection Items</b><br />Log inspection checks, notes, and condition status.</Bullet>
-                <Bullet><b>3. Review Condition Overview</b><br />Update and review the vehicle’s overall condition summary.</Bullet>
-                <Bullet><b>4. Preview & Print</b><br />Generate a clean inspection report using Preview.</Bullet>
-                <Bullet><b>5. Export a Backup</b><br />Export a JSON backup regularly, especially after major updates.</Bullet>
+                <Bullet><b>{t("step1")}</b><br />{t("step1Desc")}</Bullet>
+                <Bullet><b>{t("step2")}</b><br />{t("step2Desc")}</Bullet>
+                <Bullet><b>{t("step3")}</b><br />{t("step3Desc")}</Bullet>
+                <Bullet><b>{t("step4")}</b><br />{t("step4Desc")}</Bullet>
+                <Bullet><b>{t("step5")}</b><br />{t("step5Desc")}</Bullet>
               </ul>
             </Section>
 
-            <Section title="3) Your Data & Privacy">
-              <p>Your data is saved locally in this browser using secure local storage.</p>
+            <Section title={t("dataPrivacyTitle")}>
+              <p>{t("dataPrivacyText")}</p>
               <p className="mt-2">This means:</p>
               <ul className="space-y-1 mt-1">
-                <Bullet>Your data stays on this device</Bullet>
-                <Bullet>Clearing browser data can remove inspection records</Bullet>
-                <Bullet>Incognito/private mode will not retain data</Bullet>
-                <Bullet>Data does not automatically sync across devices</Bullet>
+                <Bullet>{t("dataPrivacyList1")}</Bullet>
+                <Bullet>{t("dataPrivacyList2")}</Bullet>
+                <Bullet>{t("dataPrivacyList3")}</Bullet>
+                <Bullet>{t("dataPrivacyList4")}</Bullet>
               </ul>
             </Section>
 
-            <Section title="4) Backup & Restore">
-              <p><b>Export</b> downloads a JSON backup of your current Vehicle CheckIt data.</p>
-              <p><b>Import</b> restores a previously exported JSON file and replaces current app data.</p>
-              <p className="mt-2 text-xs text-neutral-500 uppercase tracking-widest font-bold">Recommended routine:</p>
+            <Section title={t("backupRestoreTitle")}>
+              <p>{t("exportDesc")}</p>
+              <p>{t("importDesc")}</p>
+              <p className="mt-2 text-xs text-neutral-500 uppercase tracking-widest font-bold">{t("recommendedRoutine")}</p>
               <ul className="space-y-1 mt-1">
-                <Bullet>Export weekly</Bullet>
-                <Bullet>Export after major edits</Bullet>
-                <Bullet>Store backups in two locations (e.g., Downloads + Drive/USB)</Bullet>
+                <Bullet>{t("routine1")}</Bullet>
+                <Bullet>{t("routine2")}</Bullet>
+                <Bullet>{t("routine3")}</Bullet>
               </ul>
             </Section>
 
-            <Section title="5) Buttons Explained">
+            <Section title={t("buttonsExplainedTitle")}>
               <div className="rounded-xl border border-neutral-800 bg-neutral-900 px-4">
-                <ActionRow name="Preview" desc="Opens the print-ready inspection report." />
-                <ActionRow name="Print / Save PDF" desc="Prints only the preview sheet. Choose “Save as PDF” to create a file." />
-                <ActionRow name="Export" desc="Downloads a JSON backup file." />
-                <ActionRow name="Import" desc="Restores data from a JSON backup file." />
+                <ActionRow name={t("preview")} desc={t("previewDesc")} />
+                <ActionRow name={t("printSavePdf")} desc={t("printSavePdfDesc")} />
+                <ActionRow name={t("export")} desc={t("exportBackupDesc")} />
+                <ActionRow name={t("importData")} desc={t("importBackupDesc")} />
               </div>
             </Section>
 
-            <Section title="6) Storage Keys (Advanced)">
+            <Section title={t("storageKeysTitle")}>
               <div className="text-xs text-neutral-600 font-mono bg-neutral-950 p-2 rounded border border-neutral-800">
-                App data key: {storageKey}<br />
-                Shared profile key: {PROFILE_KEY}<br />
+                {t("appDataKey")}: {storageKey}<br />
+                {t("sharedProfileKey")}: {PROFILE_KEY}<br />
                 (If additional keys exist, list them below without removing anything.)
               </div>
             </Section>
 
-            <Section title="7) Notes / Limitations">
-              <p>Vehicle CheckIt is an inspection logging tool. Reports depend on the accuracy of the information entered.</p>
-              <p className="mt-1">Use Export regularly to avoid data loss.</p>
+            <Section title={t("notesLimitationsTitle")}>
+              <p>{t("notesLimitationsText1")}</p>
+              <p className="mt-1">{t("notesLimitationsText2")}</p>
             </Section>
-
-            <Section title="8) Support / Feedback">
-              <p>If something breaks, include: device + browser + steps to reproduce + expected vs actual behaviour.</p>
+            <Section title={t("supportFeedbackTitle")}>
+              <p>{t("supportFeedbackText")}</p>
             </Section>
           </div>
 
@@ -983,7 +1109,7 @@ function VehicleProfilesModal({
                     <Field label={t("plate")}>
                       <input
                         className={inputBase}
-                        placeholder="e.g., M-AB 1234"
+                        placeholder={t("egPlate")}
                         value={localDraft.plate}
                         onChange={(e) => setLocalDraft((d) => ({ ...d, plate: e.target.value }))}
                       />
@@ -1006,7 +1132,7 @@ function VehicleProfilesModal({
                     <Field label={t("make")}>
                       <input
                         className={inputBase}
-                        placeholder="e.g., BMW"
+                        placeholder={t("egMake")}
                         value={localDraft.make}
                         onChange={(e) => setLocalDraft((d) => ({ ...d, make: e.target.value }))}
                       />
@@ -1015,7 +1141,7 @@ function VehicleProfilesModal({
                     <Field label={t("model")}>
                       <input
                         className={inputBase}
-                        placeholder="e.g., 530i"
+                        placeholder={t("egModel")}
                         value={localDraft.model}
                         onChange={(e) => setLocalDraft((d) => ({ ...d, model: e.target.value }))}
                       />
@@ -1030,13 +1156,13 @@ function VehicleProfilesModal({
                     </Field>
 
                     <Field label={t("year")}>
-                      <input className={inputBase} placeholder="e.g., 2023" value={localDraft.year} onChange={(e) => setLocalDraft((d) => ({ ...d, year: e.target.value }))} />
+                      <input className={inputBase} placeholder={t("egYear")} value={localDraft.year} onChange={(e) => setLocalDraft((d) => ({ ...d, year: e.target.value }))} />
                     </Field>
 
                     <Field label={t("vin")}>
                       <input
                         className={inputBase}
-                        placeholder="Vehicle Identification Number"
+                        placeholder={t("vinPlaceholder")}
                         value={localDraft.vin}
                         onChange={(e) => setLocalDraft((d) => ({ ...d, vin: e.target.value }))}
                       />
@@ -1046,7 +1172,7 @@ function VehicleProfilesModal({
                   <Field label={t("notesOpt")}>
                     <textarea
                       className={inputBase + " min-h-[100px]"}
-                      placeholder="Anything useful (tyre size, quirks, etc.)"
+                      placeholder={t("notesPlaceholder")}
                       value={localDraft.notes}
                       onChange={(e) => setLocalDraft((d) => ({ ...d, notes: e.target.value }))}
                     />
@@ -1156,7 +1282,7 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serv
   );
 }
 
-function TestsPanel() {
+function TestsPanel({ t }) {
   if (!isTestsMode()) return null;
   const results = runSelfTests();
   const passCount = results.filter((r) => r.pass).length;
@@ -1171,12 +1297,12 @@ function TestsPanel() {
     <div className="rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 mb-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-sm font-semibold text-neutral-800">Self-tests</div>
+          <div className="text-sm font-semibold text-neutral-800">{t("selfTests")}</div>
           <div className="text-xs text-neutral-600">
-            {passCount}/{results.length} passing — open console for details
+            {passCount}/{results.length} {t("passing")}
           </div>
         </div>
-        <Pill tone={passCount === results.length ? "accent" : "danger"}>{passCount === results.length ? "PASS" : "FAIL"}</Pill>
+        <Pill tone={passCount === results.length ? "accent" : "danger"}>{passCount === results.length ? t("pass") : t("fail")}</Pill>
       </div>
 
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
@@ -1237,7 +1363,7 @@ const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem, t, 
       {item.severity !== "ok" ? (
         <textarea
           className="mt-2 w-full px-3 py-2 rounded-xl border border-neutral-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/30 focus:border-neutral-300 min-h-[70px]"
-          placeholder={item.severity === "issue" ? "Describe the issue" : "Add a note"}
+          placeholder={item.severity === "issue" ? t("describeIssue") : t("addNote")}
           value={localNote}
           onChange={(e) => setLocalNote(e.target.value)}
           onBlur={() => updateItem(sectionId, item.id, { note: localNote })}
@@ -1284,15 +1410,15 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
         <div className="absolute right-0 top-12 z-50 w-72 p-2 rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] origin-top-right animate-in fade-in zoom-in-95 duration-100">
           <div className="px-3 py-2 border-b border-neutral-800 mb-1">
             <div className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">
-              Export Pack
+              {t("exportPack")}
             </div>
             <div className="text-[10px] text-neutral-400 mt-0.5">
-              Save, share, or back up your data.
+              {t("exportInfo")}
             </div>
           </div>
 
           <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">
-            PDF & Print
+            {t("pdfPrint")}
           </div>
 
           <button
@@ -1302,7 +1428,7 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
             }}
             className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
           >
-            <span>Download PDF</span>
+            <span>{t("downloadPdf")}</span>
             <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
               PDF
             </span>
@@ -1315,7 +1441,7 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
             }}
             className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
           >
-            <span>Print / Save PDF</span>
+            <span>{t("printSavePdf")}</span>
           </button>
 
           <button
@@ -1325,11 +1451,11 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
             }}
             className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
           >
-            <span>Create Email Draft</span>
+            <span>{t("createEmailDraft")}</span>
           </button>
 
           <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-2 border-t border-neutral-800 pt-2">
-            JSON Backup
+            {t("jsonBackup")}
           </div>
 
           <button
@@ -1339,14 +1465,14 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
             }}
             className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
           >
-            <span>Download JSON</span>
+            <span>{t("downloadJson")}</span>
             <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
               JSON
             </span>
           </button>
 
           <label className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between cursor-pointer">
-            <span>Import JSON</span>
+            <span>{t("importJson")}</span>
             <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
               {t("upload")}
             </span>
@@ -1364,7 +1490,7 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
           </label>
 
           <div className="px-3 pb-2 text-[10px] text-neutral-500 italic">
-            Import replaces current app data. Export first if unsure.
+            {t("importWarning")}
           </div>
 
           <div className="mt-1 px-3 py-2 text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-800">
@@ -2030,7 +2156,7 @@ export default function App() {
                   {t("export")}
                 </button>
                 <button className={btnSecondary} onClick={() => downloadSingleCheckTxt(selectedSavedCheck)}>
-                  {t("TXT")}
+                  {t("txt")}
                 </button>
                 <button className={btnSecondary} onClick={() => copySingleCheck(selectedSavedCheck)}>
                   {t("copy")}
@@ -2077,20 +2203,18 @@ export default function App() {
       ) : null}
 
       <div className="max-w-6xl mx-auto p-4 sm:p-6">
-        <TestsPanel />
+        <TestsPanel t={t} />
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="w-full flex justify-center mb-2">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+          <div className="w-full flex justify-center sm:justify-start">
               <img
                 src={vehicleCheckItHeading}
                 alt="Vehicle CheckIt"
-                className="max-w-full h-auto object-contain"
+                className="h-[6.75rem] w-auto object-contain"
               />
-            </div>
           </div>
 
-          <div className="w-full sm:w-[820px]">
+          <div className="lg:col-span-3">
             <div className="relative">
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 pr-12">
                 <ActionButton onClick={openHub} title="Return to ToolStack hub">
@@ -2106,20 +2230,17 @@ export default function App() {
                 </button>
                 <DataMenu onExport={exportJSON} onImport={importJSON} onPrint={() => window.print()} t={t} />
               </div>
-
               <div className="absolute right-0 top-0">
                 <HelpIconButton onClick={() => setHelpOpen(true)} />
               </div>
             </div>
+            <div className="flex justify-end mt-2">
+              <LanguageSelector current={profile.language} onChange={(l) => setProfile((p) => ({ ...p, language: l }))} />
+            </div>
           </div>
         </div>
-
-        <div className="flex justify-end mt-2">
-          <LanguageSelector current={profile.language} onChange={(l) => setProfile((p) => ({ ...p, language: l }))} />
-        </div>
-
         <div className="mt-2 grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className={card}>
+          <div className={`${card} h-fit`}>
             <div className={cardHead}>
               <div className="font-semibold text-neutral-800">{t("vehicleProfile")}</div>
               <div className="text-xs text-neutral-600 mt-1">
@@ -2212,7 +2333,7 @@ export default function App() {
                   <div className="text-neutral-700 font-medium">{t("odometer")}</div>
                   <input
                     className={inputBase}
-                    placeholder="e.g., 123456"
+                    placeholder={t("odometerPlaceholder")}
                     inputMode="numeric"
                     value={odometerText}
                     onChange={(e) => setOdometerText(e.target.value)}
@@ -2235,7 +2356,7 @@ export default function App() {
                 <div className="text-neutral-700 font-medium">{t("serviceAlerts")}</div>
                 <textarea
                   className={inputBase + " min-h-[60px]"}
-                  placeholder="e.g. Service due in 1500km, Oil change required..."
+                  placeholder={t("serviceAlertsPlaceholder")}
                   value={serviceNotesText}
                   onChange={(e) => setServiceNotesText(e.target.value)}
                 />
@@ -2245,7 +2366,7 @@ export default function App() {
                 <div className="text-neutral-700 font-medium">{t("generalNotes")}</div>
                 <textarea
                   className={inputBase + " min-h-[96px]"}
-                  placeholder="Anything important about the vehicle today"
+                  placeholder={t("generalNotesPlaceholder")}
                   value={generalNotesText}
                   onChange={(e) => setGeneralNotesText(e.target.value)}
                 />
