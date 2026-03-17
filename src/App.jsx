@@ -1202,13 +1202,15 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serv
   const sections = draft?.sections || [];
   return (
     <div className="mx-auto max-w-4xl print:max-w-none print:w-full">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="text-2xl font-semibold text-neutral-900">{profile.org || "ToolStack"}</div>
-          <div className="text-sm text-neutral-600">{t("vehicleCheckReport")}</div>
-          <div className="mt-3 h-[2px] w-72 rounded-full bg-gradient-to-r from-[#D5FF00]/0 via-[#D5FF00] to-[#D5FF00]/0" />
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6 print:flex-row">
+        <img
+          src={vehicleCheckItHeading}
+          alt="Vehicle CheckIt"
+          className="h-auto max-h-20 sm:max-h-28 max-w-full object-contain print:h-28 print:max-h-none"
+        />
+        <div className="text-sm text-neutral-600 mt-2 sm:mt-0 print:mt-2 text-left sm:text-right print:text-right">
+          {t("generated")}: {new Date().toLocaleString()}
         </div>
-        <div className="text-sm text-neutral-600">{t("generated")}: {new Date().toLocaleString()}</div>
       </div>
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 print:grid-cols-3">
@@ -1407,96 +1409,80 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-72 p-2 rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] origin-top-right animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-3 py-2 border-b border-neutral-800 mb-1">
-            <div className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">
-              {t("exportPack")}
+        <>
+          {/* Mobile overlay */}
+          <div className="sm:hidden fixed inset-0 bg-black/50 z-40" />
+          <div
+            className={
+              "fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 p-2 rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] animate-in fade-in zoom-in-95 duration-100 " +
+              "sm:absolute sm:w-72 sm:right-0 sm:top-12 sm:inset-x-auto sm:translate-y-0 sm:origin-top-right"
+            }
+          >
+            <div className="px-3 py-2 border-b border-neutral-800 mb-1">
+              <div className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">{t("exportPack")}</div>
+              <div className="text-[10px] text-neutral-400 mt-0.5">{t("exportInfo")}</div>
             </div>
-            <div className="text-[10px] text-neutral-400 mt-0.5">
-              {t("exportInfo")}
-            </div>
-          </div>
-
-          <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">
-            {t("pdfPrint")}
-          </div>
-
-          <button
-            onClick={() => {
-              if (onPrint) onPrint();
-              setOpen(false);
-            }}
-            className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
-          >
-            <span>{t("downloadPdf")}</span>
-            <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
-              PDF
-            </span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (onPrint) onPrint();
-              setOpen(false);
-            }}
-            className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
-          >
-            <span>{t("printSavePdf")}</span>
-          </button>
-
-          <button
-            onClick={() => {
-              handleEmailDraft();
-              setOpen(false);
-            }}
-            className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
-          >
-            <span>{t("createEmailDraft")}</span>
-          </button>
-
-          <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-2 border-t border-neutral-800 pt-2">
-            {t("jsonBackup")}
-          </div>
-
-          <button
-            onClick={() => {
-              onExport();
-              setOpen(false);
-            }}
-            className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
-          >
-            <span>{t("downloadJson")}</span>
-            <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
-              JSON
-            </span>
-          </button>
-
-          <label className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between cursor-pointer">
-            <span>{t("importJson")}</span>
-            <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">
-              {t("upload")}
-            </span>
-            <input
-              type="file"
-              accept="application/json,.json"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0] || null;
-                if (file) onImport(file);
-                e.target.value = "";
+            <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">{t("pdfPrint")}</div>
+            <button
+              onClick={() => {
+                if (onPrint) onPrint();
                 setOpen(false);
               }}
-            />
-          </label>
-
-          <div className="px-3 pb-2 text-[10px] text-neutral-500 italic">
-            {t("importWarning")}
+              className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+            >
+              <span>{t("downloadPdf")}</span>
+              <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">PDF</span>
+            </button>
+            <button
+              onClick={() => {
+                if (onPrint) onPrint();
+                setOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+            >
+              <span>{t("printSavePdf")}</span>
+            </button>
+            <button
+              onClick={() => {
+                handleEmailDraft();
+                setOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+            >
+              <span>{t("createEmailDraft")}</span>
+            </button>
+            <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-2 border-t border-neutral-800 pt-2">
+              {t("jsonBackup")}
+            </div>
+            <button
+              onClick={() => {
+                onExport();
+                setOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between"
+            >
+              <span>{t("downloadJson")}</span>
+              <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">JSON</span>
+            </button>
+            <label className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800 transition group flex items-center justify-between cursor-pointer">
+              <span>{t("importJson")}</span>
+              <span className="text-xs bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded group-hover:text-[#D5FF00] transition">{t("upload")}</span>
+              <input
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  if (file) onImport(file);
+                  e.target.value = "";
+                  setOpen(false);
+                }}
+              />
+            </label>
+            <div className="px-3 pb-2 text-[10px] text-neutral-500 italic">{t("importWarning")}</div>
+            <div className="mt-1 px-3 py-2 text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-800">{t("secureStorage")}</div>
           </div>
-
-          <div className="mt-1 px-3 py-2 text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-800">
-            {t("secureStorage")}
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
@@ -1535,25 +1521,26 @@ function LanguageSelector({ current, onChange }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 w-32 p-1 rounded-xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] origin-top-right animate-in fade-in zoom-in-95 duration-100">
-          {langs.map((l) => (
-            <button
-              key={l.code}
-              onClick={() => {
-                onChange(l.code);
-                setOpen(false);
-              }}
-              className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between ${
-                current === l.code
-                  ? "bg-neutral-800 text-[#D5FF00]"
-                  : "text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800"
-              }`}
-            >
-              {l.label}
-              {current === l.code && <span>✓</span>}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="sm:hidden fixed inset-0 bg-black/50 z-40" />
+          <div className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 p-1 rounded-xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] animate-in fade-in zoom-in-95 duration-100 sm:absolute sm:w-32 sm:right-0 sm:top-10 sm:inset-x-auto sm:translate-y-0 sm:origin-top-right">
+            {langs.map((l) => (
+              <button
+                key={l.code}
+                onClick={() => {
+                  onChange(l.code);
+                  setOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between ${
+                  current === l.code ? "bg-neutral-800 text-[#D5FF00]" : "text-neutral-300 hover:text-[#D5FF00] hover:bg-neutral-800"
+                }`}
+              >
+                {l.label}
+                {current === l.code && <span>✓</span>}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
@@ -2054,29 +2041,33 @@ export default function App() {
       {previewOpen || savedOpen ? (
         <style>{`
           @media print {
-            body * { visibility: hidden; }
-            #vc-print-preview, #vc-print-preview * { visibility: visible; }
-            #vc-print-saved, #vc-print-saved * { visibility: visible; }
-            
-            #vc-print-preview, #vc-print-saved {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-              margin: 0;
-              padding: 0;
+            /* Hide everything by default via visibility */
+            body * {
+              visibility: hidden !important;
             }
 
-            /* Reset modal positioning constraints for print */
-            .fixed, .absolute, .relative {
+            /* Reset positioning and overflow to prevent clipping/repeating */
+            html, body, .min-h-screen, .fixed, .absolute, .relative, .overflow-auto, .overflow-hidden {
               position: static !important;
               overflow: visible !important;
+              height: auto !important;
+              min-height: 0 !important;
             }
-            body * { visibility: hidden !important; }
-            #vc-print-preview, #vc-print-preview * { visibility: visible !important; }
-            #vc-print-saved, #vc-print-saved * { visibility: visible !important; }
-            #vc-print-preview { position: absolute !important; left: 0; top: 0; width: 100%; }
-            #vc-print-saved { position: absolute !important; left: 0; top: 0; width: 100%; }
+
+            /* Show the print target */
+            #vc-print-preview, #vc-print-preview *,
+            #vc-print-saved, #vc-print-saved * {
+              visibility: visible !important;
+            }
+
+            #vc-print-preview, #vc-print-saved {
+              position: absolute !important;
+              left: 0 !important;
+              top: 0 !important;
+              width: 100% !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
           }
         `}</style>
       ) : null}
@@ -2119,7 +2110,7 @@ export default function App() {
 
             <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 shadow-2xl overflow-hidden min-h-0 flex flex-col">
               <div className="overflow-auto p-4 sm:p-8 custom-scrollbar">
-                <div id="vc-print-preview" className="mx-auto max-w-4xl bg-white p-8 rounded-xl shadow-lg text-neutral-900">
+                <div id="vc-print-preview" className="mx-auto max-w-4xl bg-white p-4 sm:p-8 rounded-xl shadow-lg text-neutral-900">
                   <ReportSheet
                     profile={profile}
                     date={date}
@@ -2177,7 +2168,7 @@ export default function App() {
             </div>
 
             <div className="rounded-2xl bg-white border border-neutral-200 shadow-2xl overflow-auto min-h-0">
-              <div id="vc-print-saved" className="p-6">
+              <div id="vc-print-saved" className="p-4 sm:p-6">
                 <ReportSheet
                   profile={profile}
                   date={selectedSavedCheck.date}
@@ -2202,7 +2193,7 @@ export default function App() {
         </div>
       ) : null}
 
-      <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 print:hidden">
         <TestsPanel t={t} />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
@@ -2239,7 +2230,34 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="mt-2 grid grid-cols-1 lg:grid-cols-4 gap-4">
+
+        <div className="mt-4 mb-6 rounded-2xl bg-white border border-neutral-200 p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-8">
+            <div>
+              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("items")}</div>
+              <div className="text-2xl font-black text-neutral-900 tracking-tight">
+                <span>{doneCount}</span>
+                <span className="text-neutral-400">/</span>
+                <span>{totalItems}</span>
+              </div>
+            </div>
+
+            <div className="h-8 w-px bg-neutral-200" />
+
+            <div>
+              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("issues")}</div>
+              <div className={`text-2xl font-black tracking-tight ${issueCount > 0 ? "text-red-600" : "text-emerald-600"}`}>
+                {issueCount}
+              </div>
+            </div>
+          </div>
+
+          <div className="text-[10px] font-mono text-neutral-500 bg-neutral-50 px-2 py-1 rounded border border-neutral-200">
+            {t("module")}: {moduleManifest.id}.{moduleManifest.version}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className={`${card} h-fit`}>
             <div className={cardHead}>
               <div className="font-semibold text-neutral-800">{t("vehicleProfile")}</div>
@@ -2288,18 +2306,6 @@ export default function App() {
               </div>
 
               <div className="text-xs text-neutral-600">{t("profilesInfo")}</div>
-
-              <div className="pt-2">
-                <div className="text-xs font-semibold text-neutral-700">{t("status")}</div>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <Pill tone="accent">{doneCount} {t("done")}</Pill>
-                  <Pill>{totalItems} {t("total")}</Pill>
-                  {issueCount ? <Pill tone="danger">{issueCount} {t("issuesCount")}</Pill> : <Pill>0 {t("issuesCount")}</Pill>}
-                  <Pill>
-                    {t("module")}: {moduleManifest.id}.{moduleManifest.version}
-                  </Pill>
-                </div>
-              </div>
             </div>
           </div>
 
