@@ -1855,6 +1855,11 @@ export default function App() {
 
   const openPreview = () => setPreviewOpen(true);
 
+  const handleAutoPrint = useCallback(() => {
+    setPreviewOpen(true);
+    setTimeout(() => window.print(), 500);
+  }, []);
+
   const openHub = () => {
     if (isHubPlaceholder()) {
       alert("Set HUB_URL in the code first.");
@@ -2231,7 +2236,7 @@ export default function App() {
                 >
                   {t("preview")}
                 </button>
-                <DataMenu onExport={exportJSON} onImport={importJSON} onPrint={() => window.print()} t={t} />
+                <DataMenu onExport={exportJSON} onImport={importJSON} onPrint={handleAutoPrint} t={t} />
 
                 <div className="absolute right-0 top-0">
                   <HelpIconButton onClick={() => setHelpOpen(true)} />
