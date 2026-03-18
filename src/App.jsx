@@ -801,7 +801,7 @@ function Pill({ children, tone = "default" }) {
 }
 
 const ACTION_BASE =
-  "print:hidden h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] " +
+  "print:hidden h-10 w-32 rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] " +
   "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center " +
   "focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative";
 
@@ -1403,7 +1403,7 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative"
+        className="h-10 w-32 rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 z-10 relative"
       >
         {t("export")}
       </button>
@@ -1411,16 +1411,25 @@ function DataMenu({ onExport, onImport, onPrint, t }) {
       {open && (
         <>
           {/* Mobile overlay */}
-          <div className="sm:hidden fixed inset-0 bg-black/50 z-40" />
+          <div className="sm:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setOpen(false)} />
           <div
             className={
               "fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 p-2 rounded-2xl border border-neutral-800 bg-neutral-900/95 backdrop-blur-xl shadow-[0_0_30px_-10px_rgba(213,255,0,0.3)] animate-in fade-in zoom-in-95 duration-100 " +
               "sm:absolute sm:w-72 sm:right-0 sm:top-12 sm:inset-x-auto sm:translate-y-0 sm:origin-top-right"
             }
           >
-            <div className="px-3 py-2 border-b border-neutral-800 mb-1">
-              <div className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">{t("exportPack")}</div>
-              <div className="text-[10px] text-neutral-400 mt-0.5">{t("exportInfo")}</div>
+            <div className="px-3 py-2 border-b border-neutral-800 mb-1 flex items-start justify-between gap-2">
+              <div>
+                <div className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">{t("exportPack")}</div>
+                <div className="text-[10px] text-neutral-400 mt-0.5">{t("exportInfo")}</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="h-6 w-6 rounded-lg flex items-center justify-center text-neutral-500 hover:text-white hover:bg-neutral-800 transition -mr-2 -mt-1"
+              >
+                ✕
+              </button>
             </div>
             <div className="px-3 py-1 text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">{t("pdfPrint")}</div>
             <button
@@ -2061,12 +2070,15 @@ export default function App() {
             }
 
             #vc-print-preview, #vc-print-saved {
-              position: absolute !important;
+              position: relative !important;
               left: 0 !important;
               top: 0 !important;
               width: 100% !important;
               margin: 0 !important;
               padding: 0 !important;
+              overflow: visible !important;
+              background: white !important;
+              color: black !important;
             }
           }
         `}</style>
@@ -2096,9 +2108,9 @@ export default function App() {
           <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-md" onClick={() => setPreviewOpen(false)} />
 
           <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
-            <div className="mb-3 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_0_15px_-3px_rgba(213,255,0,0.15)] p-3 flex items-center justify-between gap-3 shrink-0">
+            <div className="mb-3 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-[0_0_15px_-3px_rgba(213,255,0,0.15)] p-3 flex flex-wrap items-center justify-between gap-3 shrink-0 print:hidden">
               <div className="text-lg font-bold tracking-wide text-[#D5FF00] pl-2">{t("printPreview")}</div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button className={btnSecondary} onClick={() => window.print()}>
                   {t("printSavePdf")}
                 </button>
@@ -2134,8 +2146,8 @@ export default function App() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
           <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={() => setSavedOpen(false)} />
 
-          <div className="relative w-full max-w-5xl flex flex-col max-h-full pointer-events-auto">
-            <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div className="relative w-full max-w-5xl flex flex-col max-h-[90vh] pointer-events-auto">
+            <div className="mb-3 rounded-2xl bg-white border border-neutral-200 shadow-sm p-3 flex flex-wrap items-center justify-between gap-3 shrink-0 print:hidden">
               <div>
                 <div className="text-lg font-semibold text-neutral-800">{t("savedCheck")}</div>
                 <div className="text-sm text-neutral-600">
@@ -2201,28 +2213,29 @@ export default function App() {
               <img
                 src={vehicleCheckItHeading}
                 alt="Vehicle CheckIt"
-                className="h-[6.75rem] w-auto object-contain"
+                className="h-[10.125rem] w-auto object-contain"
               />
           </div>
 
           <div className="lg:col-span-3">
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 pr-12">
+            <div className="relative flex items-center justify-end">
+              <div className="flex flex-wrap gap-2 pr-12">
                 <ActionButton onClick={openHub} title="Return to ToolStack hub">
-                  Hub
+                 Hub
                 </ActionButton>
                 <button
                   type="button"
                   onClick={openPreview}
                   disabled={totalItems === 0}
-                  className="h-10 w-full rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 disabled:opacity-50 disabled:cursor-not-allowed z-10 relative"
+                  className="h-10 w-32 rounded-xl text-sm font-bold tracking-wide border transition shadow-sm active:translate-y-[1px] flex items-center justify-center bg-neutral-900 text-[#D5FF00] border-neutral-800 hover:bg-neutral-800 hover:border-[#D5FF00]/50 focus:outline-none focus:ring-2 focus:ring-[#D5FF00]/50 disabled:opacity-50 disabled:cursor-not-allowed z-10 relative"
                 >
                   {t("preview")}
                 </button>
                 <DataMenu onExport={exportJSON} onImport={importJSON} onPrint={() => window.print()} t={t} />
-              </div>
-              <div className="absolute right-0 top-0">
-                <HelpIconButton onClick={() => setHelpOpen(true)} />
+
+                <div className="absolute right-0 top-0">
+                  <HelpIconButton onClick={() => setHelpOpen(true)} />
+                </div>
               </div>
             </div>
             <div className="flex justify-end mt-2">
@@ -2231,29 +2244,32 @@ export default function App() {
           </div>
         </div>
 
-        <div className="mt-4 mb-6 rounded-2xl bg-white border border-neutral-200 p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-8">
-            <div>
-              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("items")}</div>
-              <div className="text-2xl font-black text-neutral-900 tracking-tight">
-                <span>{doneCount}</span>
-                <span className="text-neutral-400">/</span>
-                <span>{totalItems}</span>
+        <div className="mt-4 mb-6 rounded-2xl bg-white border border-neutral-200 p-4 shadow-sm">
+          <div className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">{t("status")}</div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-8">
+              <div>
+                <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("items")}</div>
+                <div className="text-2xl font-black text-neutral-900 tracking-tight">
+                  <span>{doneCount}</span>
+                  <span className="text-neutral-400">/</span>
+                  <span>{totalItems}</span>
+                </div>
+              </div>
+
+              <div className="h-8 w-px bg-neutral-200" />
+
+              <div>
+                <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("issues")}</div>
+                <div className={`text-2xl font-black tracking-tight ${issueCount > 0 ? "text-red-600" : "text-emerald-600"}`}>
+                  {issueCount}
+                </div>
               </div>
             </div>
 
-            <div className="h-8 w-px bg-neutral-200" />
-
-            <div>
-              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("issues")}</div>
-              <div className={`text-2xl font-black tracking-tight ${issueCount > 0 ? "text-red-600" : "text-emerald-600"}`}>
-                {issueCount}
-              </div>
+            <div className="text-[10px] font-mono text-neutral-500 bg-neutral-50 px-2 py-1 rounded border border-neutral-200">
+              {t("module")}: {moduleManifest.id}.{moduleManifest.version}
             </div>
-          </div>
-
-          <div className="text-[10px] font-mono text-neutral-500 bg-neutral-50 px-2 py-1 rounded border border-neutral-200">
-            {t("module")}: {moduleManifest.id}.{moduleManifest.version}
           </div>
         </div>
 
