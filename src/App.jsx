@@ -36,6 +36,80 @@ import {
 
 import vehicleCheckItHeading from "./assets/vehiclecheckit-heading.png";
 
+/* PHOTO STORAGE (IndexedDB) + COMPRESSION */
+const PHOTO_DB = "toolstack.vehiclecheckit.photos";
+const PHOTO_STORE = "photos";
+
+function openPhotosDb() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(PHOTO_DB, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(PHOTO_STORE)) {
+        db.createObjectStore(PHOTO_STORE, { keyPath: "id" });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function savePhotoBlob(storageKey, blob, mimeType) {
+  return openPhotosDb().then((db) => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_STORE, "readwrite");
+      tx.objectStore(PHOTO_STORE).put({ id: storageKey, blob, mimeType, createdAt: Date.now() });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  });
+}
+
+function getPhotoBlob(storageKey) {
+  return openPhotosDb().then((db) => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_STORE, "readonly");
+      const req = tx.objectStore(PHOTO_STORE).get(storageKey);
+      req.onsuccess = () => resolve(req.result?.blob || null);
+      req.onerror = () => reject(req.error);
+    });
+  });
+}
+
+function deletePhotoBlob(storageKey) {
+  return openPhotosDb().then((db) => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_STORE, "readwrite");
+      tx.objectStore(PHOTO_STORE).delete(storageKey);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  });
+}
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      const max = 1600;
+      if (width > max) {
+        height = Math.round(height * (max / width));
+        width = max;
+      }
+      const cvs = document.createElement("canvas");
+      cvs.width = width;
+      cvs.height = height;
+      cvs.getContext("2d").drawImage(img, 0, 0, width, height);
+      cvs.toBlob((b) => (b ? resolve(b) : reject(new Error("Compression failed"))), "image/jpeg", 0.75);
+    };
+    img.onerror = () => reject(new Error("Image load error"));
+    img.src = url;
+  });
+}
+
 const T = {
   EN: {
     vehicleCheckReport: "Vehicle Check Report",
@@ -121,6 +195,7 @@ const T = {
     closeGuide: "Close Guide",
     ok: "OK",
     note: "Note",
+    notes: "Notes",
     issue: "Issue",
     exportPack: "Export Pack",
     exportInfo: "Save, share, or back up your data.",
@@ -186,7 +261,12 @@ const T = {
     passing: "passing — open console for details",
     pass: "PASS",
     fail: "FAIL",
-    txt: "TXT"
+    txt: "TXT",
+    addPhoto: "Add Photo",
+    updateCheck: "Update check",
+    zip: "Report Download",
+    addItem: "Add Item",
+    enterItemName: "Enter item name:"
   },
   DE: {
     vehicleCheckReport: "Fahrzeugprüfbericht",
@@ -272,6 +352,7 @@ const T = {
     closeGuide: "Anleitung schließen",
     ok: "OK",
     note: "Hinweis",
+    notes: "Hinweise",
     issue: "Mangel",
     exportPack: "Export-Paket",
     exportInfo: "Daten speichern, teilen oder sichern.",
@@ -337,7 +418,12 @@ const T = {
     passing: "bestanden — Konsole für Details öffnen",
     pass: "BESTANDEN",
     fail: "FEHLGESCHLAGEN",
-    txt: "TXT"
+    txt: "TXT",
+    addPhoto: "Foto hinzufügen",
+    updateCheck: "Prüfung aktualisieren",
+    zip: "Bericht herunterladen",
+    addItem: "Position hinzufügen",
+    enterItemName: "Positionsname eingeben:"
   }
 };
 
@@ -1198,7 +1284,55 @@ function VehicleProfilesModal({
   );
 }
 
-function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serviceNotes, draft, totals, storageKey, t }) {
+function PhotoThumbnail({ photo, className, onClick }) {
+  const [src, setSrc] = useState(null);
+  useEffect(() => {
+    let active = true;
+    let url = null;
+    if (photo.storageKey) {
+      getPhotoBlob(photo.storageKey)
+        .then((blob) => {
+          if (active && blob) {
+            url = URL.createObjectURL(blob);
+            setSrc(url);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => {
+      active = false;
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [photo.storageKey]);
+
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt="Check"
+      className={className + (onClick ? " cursor-pointer hover:opacity-90 transition" : "")}
+      onClick={onClick ? (e) => { e.stopPropagation(); onClick(photo); } : undefined}
+    />
+  );
+}
+
+function PhotoViewModal({ photo, onClose, t }) {
+  if (!photo) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 print:hidden" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+      <div className="relative z-10 max-w-full max-h-full flex flex-col items-center">
+        <PhotoThumbnail photo={photo} className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl" />
+        <button
+          className="mt-4 px-6 py-2 bg-neutral-800 text-white rounded-full font-bold hover:bg-neutral-700 transition border border-neutral-700"
+          onClick={onClose}
+        >{t("close")}</button>
+      </div>
+    </div>
+  );
+}
+
+function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serviceNotes, draft, totals, storageKey, t, onViewPhoto }) {
   const sections = draft?.sections || [];
   return (
     <div className="mx-auto max-w-4xl print:max-w-none print:w-full">
@@ -1253,12 +1387,28 @@ function ReportSheet({ profile, date, vehicleLabel, odometer, generalNotes, serv
             <div className="font-semibold">{s.title}</div>
             <div className="mt-2 space-y-2">
               {(s.items || []).map((it) => (
-                <div key={it.id} className="text-sm flex items-start justify-between gap-3 border-t pt-2 first:border-t-0 first:pt-0">
-                  <div className="min-w-0">
-                    <div className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</div>
-                    {it.note ? <div className="text-neutral-600 whitespace-pre-wrap break-words">{it.note}</div> : null}
+                <div key={it.id} className="text-sm border-t pt-2 first:border-t-0 first:pt-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className={it.done ? "line-through text-neutral-500" : ""}>{it.label}</div>
+                      {it.note ? <div className="text-neutral-600 whitespace-pre-wrap break-words">{it.note}</div> : null}
+                    </div>
+                    <span className={"shrink-0 text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>
+                      {labelFor(it.severity, profile.language)}
+                    </span>
                   </div>
-                  <span className={"shrink-0 text-xs px-2 py-1 rounded-full border " + badgeFor(it.severity)}>{labelFor(it.severity, profile.language)}</span>
+                  {it.photos && it.photos.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {it.photos.map((p) => (
+                        <PhotoThumbnail
+                          key={p.id}
+                          photo={p}
+                          className="h-20 w-auto object-contain rounded border border-neutral-200"
+                          onClick={onViewPhoto}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -1319,8 +1469,11 @@ function TestsPanel({ t }) {
   );
 }
 
-const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem, t, lang }) {
+const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem, deleteItem, t, lang, onAddPhoto, totalPhotos, isLocked, onViewPhoto }) {
   const [localNote, setLocalNote] = useState(item.note || "");
+
+  const itemPhotoCount = item.photos?.length || 0;
+  const canAddPhoto = !isLocked && itemPhotoCount < 3 && (totalPhotos || 0) < 20;
 
   useEffect(() => {
     setLocalNote(item.note || "");
@@ -1359,6 +1512,16 @@ const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem, t, 
             <option value="note">{t("note")}</option>
             <option value="issue">{t("issue")}</option>
           </select>
+          {deleteItem && !isLocked ? (
+            <button
+              type="button"
+              className="ml-1 text-neutral-400 hover:text-red-500 transition px-1 font-bold"
+              onClick={() => deleteItem(sectionId, item.id)}
+              title={t("delete")}
+            >
+              ✕
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -1370,6 +1533,46 @@ const ItemCard = React.memo(function ItemCard({ sectionId, item, updateItem, t, 
           onChange={(e) => setLocalNote(e.target.value)}
           onBlur={() => updateItem(sectionId, item.id, { note: localNote })}
         />
+      ) : null}
+
+      {item.done && (item.severity === "note" || item.severity === "issue") && onAddPhoto ? (
+        <div className="mt-2">
+          <label
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition ${
+              canAddPhoto
+                ? "bg-neutral-50 border-neutral-200 text-neutral-700 cursor-pointer hover:bg-neutral-100"
+                : "bg-neutral-100 border-neutral-200 text-neutral-400 cursor-not-allowed"
+            }`}
+          >
+            <span>
+              📷 {t("addPhoto") || "Add Photo"} ({itemPhotoCount}/3)
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={!canAddPhoto}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onAddPhoto(item.id, file);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+      ) : null}
+
+      {item.photos && item.photos.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {item.photos.map((p) => (
+            <PhotoThumbnail
+              key={p.id}
+              photo={p}
+              className="h-16 w-16 object-cover rounded-lg border border-neutral-200"
+              onClick={onViewPhoto}
+            />
+          ))}
+        </div>
       ) : null}
     </div>
   );
@@ -1573,11 +1776,13 @@ export default function App() {
   const [vehicleModalMode, setVehicleModalMode] = useState("list");
   const [vehicleEditId, setVehicleEditId] = useState(null);
   const [vehicleDraft, setVehicleDraft] = useState(null);
+  const [editingCheckId, setEditingCheckId] = useState(null);
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [savedId, setSavedId] = useState(null);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [viewingPhoto, setViewingPhoto] = useState(null);
 
   const [toast, setToast] = useState(null);
   const vehicles = useMemo(() => profile.vehicles || [], [profile.vehicles]);
@@ -1636,6 +1841,59 @@ export default function App() {
     };
   });
 
+  const totalPhotos = useMemo(() => {
+    let count = 0;
+    if (draft?.sections) {
+      for (const s of draft.sections) {
+        for (const it of s.items) {
+          if (it.photos) count += it.photos.length;
+        }
+      }
+    }
+    return count;
+  }, [draft]);
+
+  const handleAddPhoto = useCallback((itemId, file) => {
+    if (!file) return;
+    if (totalPhotos >= 20) {
+      alert("Total photo limit reached (20).");
+      return;
+    }
+
+    compressImage(file)
+      .then((blob) => {
+        const storageKey = uid("blob");
+        return savePhotoBlob(storageKey, blob, "image/jpeg").then(() => storageKey);
+      })
+      .then((storageKey) => {
+        setDraft((prev) => ({
+          ...prev,
+          sections: prev.sections.map((s) => ({
+            ...s,
+            items: s.items.map((it) => {
+              if (it.id !== itemId) return it;
+              return {
+                ...it,
+                photos: [
+                  ...(it.photos || []),
+                  {
+                    id: uid("ph"),
+                    storageKey,
+                    name: file.name,
+                    date: new Date().toISOString(),
+                  },
+                ],
+              };
+            }),
+          })),
+        }));
+      })
+      .catch((err) => {
+        console.error("Photo upload error:", err);
+        alert("Could not add photo. Please try again.");
+      });
+  }, [totalPhotos]);
+
   useEffect(() => {
     setDraft((d) => ({ ...d, date, vehicleId }));
   }, [date, vehicleId]);
@@ -1643,6 +1901,12 @@ export default function App() {
   const issueCount = useMemo(() => {
     let n = 0;
     for (const s of draft.sections) for (const it of s.items) if (it.severity === "issue") n++;
+    return n;
+  }, [draft.sections]);
+
+  const noteCount = useMemo(() => {
+    let n = 0;
+    for (const s of draft.sections) for (const it of s.items) if (it.severity === "note") n++;
     return n;
   }, [draft.sections]);
 
@@ -1674,7 +1938,64 @@ export default function App() {
     }));
   }, []);
 
+  const addItem = useCallback((sectionId) => {
+    const label = window.prompt(t("enterItemName") || "Enter item name:");
+    if (!label) return;
+
+    setDraft((d) => ({
+      ...d,
+      sections: d.sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          items: [
+            ...s.items,
+            {
+              id: uid("i"),
+              label,
+              severity: "ok",
+              note: "",
+              done: false,
+            },
+          ],
+        };
+      }),
+    }));
+  }, [t]);
+
+  const deleteItem = useCallback((sectionId, itemId) => {
+    if (!window.confirm(t("delete") + "?")) return;
+    setDraft((d) => ({
+      ...d,
+      sections: d.sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        return {
+          ...s,
+          items: s.items.filter((it) => it.id !== itemId),
+        };
+      }),
+    }));
+  }, [t]);
+
+  function loadCheckForEditing(check) {
+    if (!check) return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setDate(check.date || isoToday());
+    setVehicleId(check.vehicleId || (vehicles.length > 0 ? vehicles[0].id : ""));
+    setOdometerText(check.odometer || "");
+    setServiceNotesText(check.serviceNotes || "");
+    setGeneralNotesText(check.generalNotes || "");
+    setDraft({
+      date: check.date,
+      vehicleId: check.vehicleId,
+      sections: JSON.parse(JSON.stringify(check.sections || [])),
+    });
+    setEditingCheckId(check.id);
+    notify("Loaded for editing");
+  }
+
   function resetDraft() {
+    setEditingCheckId(null);
     const t = appState.template;
     setDraft({
       date,
@@ -1699,6 +2020,32 @@ export default function App() {
   }
 
   function saveCheck() {
+    if (editingCheckId) {
+      setAppState((prev) =>
+        saveState({
+          ...prev,
+          checks: (prev.checks || []).map((c) => {
+            if (c.id !== editingCheckId) return c;
+            return {
+              ...c,
+              date,
+              vehicleId,
+              vehicleLabel,
+              odometer: String(odometerText || "").trim(),
+              serviceNotes: String(serviceNotesText || "").trim(),
+              generalNotes: String(generalNotesText || "").trim(),
+              sections: draft.sections,
+              summary: { totalItems, doneCount, issueCount },
+              updatedAt: new Date().toISOString(),
+            };
+          }),
+        })
+      );
+      notify("Updated check");
+      resetDraft();
+      return;
+    }
+
     const check = {
       id: uid("vc"),
       createdAt: new Date().toISOString(),
@@ -1728,6 +2075,70 @@ export default function App() {
     if (!ok) return;
     setAppState((prev) => saveState({ ...prev, checks: (prev.checks || []).filter((c) => c.id !== id) }));
     notify("Deleted");
+  }
+
+  async function downloadZip(check) {
+    if (!check) return;
+    try {
+      notify("Preparing Zip...");
+      
+      // Dynamically load libraries to avoid build errors if not present
+      const [JSZip, { saveAs }, { jsPDF }] = await Promise.all([
+        import("jszip").then((m) => m.default || m),
+        import("file-saver"),
+        import("jspdf"),
+      ]);
+
+      const zip = new JSZip();
+      
+      // 1. Generate PDF Report
+      const doc = new jsPDF();
+      doc.setFontSize(10);
+      // Use the existing summary text builder
+      const text = buildCheckSummaryText(check, lang);
+      // Split text to fit page width (A4 width ~210mm, margin 10mm -> 190mm)
+      const splitText = doc.splitTextToSize(text, 180);
+      doc.text(splitText, 10, 10);
+      const pdfBlob = doc.output("blob");
+      zip.file(`Report_${check.date || "check"}.pdf`, pdfBlob);
+
+      // 2. Add Photos
+      const photoFolder = zip.folder("photos");
+      const photoTasks = [];
+
+      if (check.sections) {
+        for (const s of check.sections) {
+          for (const item of s.items || []) {
+            if (item.photos && item.photos.length > 0) {
+              item.photos.forEach((p, idx) => {
+                if (p.storageKey) {
+                  const safeLabel = (item.label || "item").replace(/[^a-z0-9]/gi, "_");
+                  const fileName = `${safeLabel}_${idx + 1}.jpg`;
+                  photoTasks.push(
+                    getPhotoBlob(p.storageKey).then((blob) => {
+                      if (blob) photoFolder.file(fileName, blob);
+                    })
+                  );
+                }
+              });
+            }
+          }
+        }
+      }
+
+      await Promise.all(photoTasks);
+
+      // 3. Save Zip
+      const content = await zip.generateAsync({ type: "blob" });
+      const safeDate = String(check.date || isoToday()).replace(/[^0-9-]/g, "");
+      const zipName = `Check_${safeDate}_${(check.vehicleLabel || "vehicle").replace(/[^a-z0-9]/gi, "_")}.zip`;
+      
+      saveAs(content, zipName);
+      notify("Zip downloaded");
+    } catch (e) {
+      console.error(e);
+      alert("Zip generation failed. Ensure jszip, file-saver, and jspdf are installed.\nError: " + e.message);
+    }
   }
 
   function exportJSON() {
@@ -2091,6 +2502,8 @@ export default function App() {
 
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} appName="Vehicle Check-It" storageKey={KEY} t={t} />
 
+      <PhotoViewModal photo={viewingPhoto} onClose={() => setViewingPhoto(null)} t={t} />
+
       <VehicleProfilesModal
         open={vehicleModalOpen}
         onClose={() => setVehicleModalOpen(false)}
@@ -2139,6 +2552,7 @@ export default function App() {
                     totals={totalsForPreview}
                     storageKey={KEY}
                     t={t}
+                    onViewPhoto={setViewingPhoto}
                   />
                 </div>
               </div>
@@ -2203,6 +2617,7 @@ export default function App() {
                   }
                   storageKey={KEY}
                   t={t}
+                  onViewPhoto={setViewingPhoto}
                 />
               </div>
             </div>
@@ -2252,7 +2667,16 @@ export default function App() {
         <div className="mt-4 mb-6 rounded-2xl bg-white border border-neutral-200 p-4 shadow-sm">
           <div className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-2">{t("status")}</div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-8">
+            <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+              <div>
+                <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("vehicle")}</div>
+                <div className="text-lg font-bold text-neutral-900 truncate max-w-[160px] sm:max-w-xs" title={vehicleLabel}>
+                  {vehicleLabel || "—"}
+                </div>
+              </div>
+
+              <div className="hidden sm:block h-8 w-px bg-neutral-200" />
+
               <div>
                 <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("items")}</div>
                 <div className="text-2xl font-black text-neutral-900 tracking-tight">
@@ -2268,6 +2692,15 @@ export default function App() {
                 <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("issues")}</div>
                 <div className={`text-2xl font-black tracking-tight ${issueCount > 0 ? "text-red-600" : "text-emerald-600"}`}>
                   {issueCount}
+                </div>
+              </div>
+
+              <div className="h-8 w-px bg-neutral-200" />
+
+              <div>
+                <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{t("notes")}</div>
+                <div className={`text-2xl font-black tracking-tight ${noteCount > 0 ? "text-amber-600" : "text-neutral-400"}`}>
+                  {noteCount}
                 </div>
               </div>
             </div>
@@ -2405,9 +2838,27 @@ export default function App() {
                     <div className="font-semibold text-neutral-800">{s.title}</div>
                     <div className="mt-2 space-y-2">
                       {s.items.map((it) => (
-                        <ItemCard key={it.id} sectionId={s.id} item={it} updateItem={updateItem} t={t} lang={lang} />
+                        <ItemCard
+                          key={it.id}
+                          sectionId={s.id}
+                          item={it}
+                          updateItem={updateItem}
+                          deleteItem={deleteItem}
+                          t={t}
+                          lang={lang}
+                          onAddPhoto={typeof handleAddPhoto !== "undefined" ? handleAddPhoto : undefined}
+                          totalPhotos={typeof totalPhotos !== "undefined" ? totalPhotos : 0}
+                          isLocked={typeof isLocked !== "undefined" ? isLocked : false}
+                          onViewPhoto={setViewingPhoto}
+                        />
                       ))}
                     </div>
+                    <button
+                      className="mt-3 w-full py-2 rounded-xl border border-dashed border-neutral-300 text-xs font-bold text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 transition"
+                      onClick={() => addItem(s.id)}
+                    >
+                      + {t("addItem")}
+                    </button>
                   </div>
                 ))}
               </div>
@@ -2422,7 +2873,7 @@ export default function App() {
                     {t("preview")}
                   </button>
                   <button className={btnSecondary} onClick={saveCheck}>
-                    {t("saveCheck")}
+                    {editingCheckId ? t("updateCheck") : t("saveCheck")}
                   </button>
                 </div>
               </div>
@@ -2475,6 +2926,12 @@ export default function App() {
                         </td>
                         <td className="py-2 pr-2 text-right">
                           <div className="flex flex-wrap items-center justify-end gap-2">
+                            <button className={btnMini} onClick={() => loadCheckForEditing(c)}>
+                              {t("edit")}
+                            </button>
+                            <button className={btnMini} onClick={() => downloadZip(c)}>
+                              {t("zip")}
+                            </button>
                             <button className={btnMini} onClick={() => openSaved(c.id)}>
                               {t("view")}
                             </button>
